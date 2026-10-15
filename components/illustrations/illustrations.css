@@ -1,0 +1,492 @@
+@layer theme, base, components, utilities;
+
+/* Illustration styles for components/Explainer.tsx and components/illustrations.
+   The authored SVG geometry is the final state. Start states only exist under html[data-motion="on"]
+   (set by MotionRoot after hydration) and prefers-reduced-motion: no-preference. Keyframes use the ill- prefix.
+   Colors and stroke widths on SVG elements come from utilities, which outrank this layer. */
+
+@layer components {
+  /* Canvas and type */
+  .ill-svg {
+    --ill-soft: color-mix(in oklab, var(--accent) 14%, var(--card));
+    --ill-on-accent: #fff;
+    --ill-glow: color-mix(in oklab, var(--accent) 45%, transparent);
+    /* Plays every figure storyboard (the authored --d/--dur, up to ~2.6 s) at 0.6x, so a tall plate on a phone
+       has settled within ~1.5 s instead of leaving its lower half blank while already on screen. */
+    --ill-t: 0.6;
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-color-scheme: dark) {
+    .ill-svg {
+      --ill-soft: color-mix(in oklab, var(--accent) 24%, var(--card));
+      --ill-on-accent: var(--page);
+    }
+  }
+  @media (min-width: 64rem) and (min-height: 46rem) {
+    .ill.ill-sticky {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+    }
+  }
+  .ill-svg :is(path, rect, circle, line) {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ill-svg text {
+    font-size: 11px;
+    fill: var(--muted);
+    stroke: none;
+  }
+  .ill-svg .t-strong {
+    font-size: 12px;
+    font-weight: 600;
+    fill: var(--fg);
+  }
+  .ill-svg .t-accent {
+    font-size: 12px;
+    font-weight: 600;
+    fill: var(--accent);
+  }
+  .ill-svg .t-eyebrow {
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+  .ill-svg .t-on-accent {
+    font-size: 12px;
+    font-weight: 600;
+    fill: var(--ill-on-accent);
+  }
+
+  /* Choreography primitives. Knobs: --d (delay after data-inview), --dur, --from.
+     Dash 1, gap 2 with pathLength="1": offset 1.01 hides the whole path without a stray round-cap dot. */
+  .ill-svg .a-draw {
+    stroke-dasharray: 1 2;
+  }
+  .ill-svg :is(.a-pop, .a-rise, .a-grow, .a-slide, .ping) {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .ill-svg .a-rise {
+    transform-origin: bottom;
+  }
+  .ill-svg :is(.traveler, .ping) {
+    opacity: 0;
+  }
+
+  @media screen and (prefers-reduced-motion: no-preference) {
+    html[data-motion="on"] .ill:not([data-inview]) .a-draw {
+      stroke-dashoffset: 1.01;
+    }
+    html[data-motion="on"] .ill:not([data-inview]) .a-fade {
+      opacity: 0;
+    }
+    html[data-motion="on"] .ill:not([data-inview]) .a-pop {
+      opacity: 0;
+      scale: 0.85;
+    }
+    html[data-motion="on"] .ill:not([data-inview]) .a-rise {
+      scale: 1 0;
+    }
+    html[data-motion="on"] .ill:not([data-inview]) .a-grow {
+      scale: 0 1;
+    }
+    html[data-motion="on"] .ill:not([data-inview]) .a-slide {
+      opacity: 0;
+      translate: var(--from, 0 8px);
+    }
+    .ill[data-inview] .a-draw {
+      transition: stroke-dashoffset calc(var(--dur, var(--m-dur-5)) * var(--ill-t)) var(--m-ease-in-out)
+        calc(var(--d, 0ms) * var(--ill-t));
+    }
+    .ill[data-inview] .a-fade {
+      transition: opacity calc(var(--dur, var(--m-dur-3)) * var(--ill-t)) var(--m-ease-out)
+        calc(var(--d, 0ms) * var(--ill-t));
+    }
+    .ill[data-inview] .a-pop {
+      transition:
+        opacity calc(var(--m-dur-3) * var(--ill-t)) var(--m-ease-out) calc(var(--d, 0ms) * var(--ill-t)),
+        scale calc(var(--m-dur-3) * var(--ill-t)) var(--m-ease-spring) calc(var(--d, 0ms) * var(--ill-t));
+    }
+    .ill[data-inview] :is(.a-rise, .a-grow) {
+      transition: scale calc(var(--dur, var(--m-dur-4)) * var(--ill-t)) var(--m-ease-out)
+        calc(var(--d, 0ms) * var(--ill-t));
+    }
+    .ill[data-inview] .a-slide {
+      transition:
+        opacity calc(var(--m-dur-3) * var(--ill-t)) var(--m-ease-out) calc(var(--d, 0ms) * var(--ill-t)),
+        translate calc(var(--dur, var(--m-dur-4)) * var(--ill-t)) var(--m-ease-in-out)
+          calc(var(--d, 0ms) * var(--ill-t));
+    }
+    /* 5 cycles = 4.5 s, under the 5 s of WCAG 2.2.2; it only loops on while a mouse rests on the plate. */
+    .ill[data-inview] .flow {
+      animation: ill-flow 0.9s linear calc(1.2s * var(--ill-t)) 5;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .ill[data-inview]:hover .flow {
+        animation-iteration-count: infinite;
+      }
+    }
+    .ill[data-inview] .ping {
+      /* no backwards fill: the ring stays hidden during the delay */
+      animation: ill-ping calc(900ms * var(--ill-t)) var(--m-ease-out) calc(var(--d, 0ms) * var(--ill-t)) 1;
+    }
+    .ill[data-inview] .traveler {
+      animation: ill-drop calc(1100ms * var(--ill-t)) var(--m-ease-in-out) calc(var(--d, 0ms) * var(--ill-t)) 1 both;
+    }
+  }
+
+  /* Accent groups wrapped in <g class="glow"> light up while the plate is hovered (filter only). */
+  .ill .glow {
+    transition: filter var(--m-dur-3) var(--m-ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ill:hover .glow {
+      filter: drop-shadow(0 0 6px var(--ill-glow));
+    }
+  }
+
+  /* Fig. 2: hovering one year dims the others (pointer only; every value is always printed). */
+  .ramp-bar {
+    transition: opacity var(--m-dur-2) var(--m-ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ill:has(.ramp-bar:hover) .ramp-bar:not(:hover) {
+      opacity: 0.4;
+    }
+  }
+
+  /* Fig. 3: hovering a condition in the list lights its part of the drawing (pointer only, enhancement). */
+  .ill-part [data-part] {
+    transition:
+      opacity var(--m-dur-2) var(--m-ease-out),
+      filter var(--m-dur-2) var(--m-ease-out);
+  }
+  .ill-part li[data-key] {
+    transition: color var(--m-dur-2);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    /* Hover intent: a pointer just passing over the list (e.g. while scrolling) doesn't dim the drawing,
+       and when it does dim, the rest stays legible. */
+    .ill-part:has(li[data-key]:hover) [data-part] {
+      opacity: 0.5;
+      transition-delay: 150ms;
+    }
+    .ill-part:has(li[data-key="meter"]:hover) [data-part="meter"],
+    .ill-part:has(li[data-key="loose"]:hover) [data-part="loose"],
+    .ill-part:has(li[data-key="grid"]:hover) [data-part="grid"],
+    .ill-part:has(li[data-key="kwh"]:hover) [data-part="kwh"],
+    .ill-part:has(li[data-key="provider"]:hover) [data-part="provider"] {
+      opacity: 1;
+      filter: drop-shadow(0 0 6px var(--ill-glow));
+    }
+    .ill-part li[data-key]:hover {
+      color: var(--fg);
+    }
+    .ill-part li[data-key]:hover::marker {
+      color: var(--accent);
+    }
+  }
+
+  /* Fig. 4 plate C: swings between expensive oil (state A) and cheap oil (state B, the authored state).
+     Keyframes go A -> B -> A and loop for as long as the page is open (owner's choice: no pause control, so this
+     exceeds the 5 s of WCAG 2.2.2). Reduced motion and no-JS show the static authored state B. */
+  .ill .oil-fossil {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    vector-effect: non-scaling-stroke; /* keeps the outline even while the bar is stretched */
+  }
+  .ill .oil-premium {
+    transform-box: fill-box;
+    transform-origin: top;
+  }
+  .ill .oil-arrow {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .ill .oil-a {
+    opacity: 0;
+  }
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .ill[data-inview] :is(.oil-fossil, .oil-follow, .oil-premium, .oil-arrow, .oil-a, .oil-b) {
+      animation-duration: 6.4s;
+      animation-delay: calc(1600ms * var(--ill-t));
+      animation-iteration-count: infinite;
+      animation-timing-function: var(--m-ease-in-out);
+      animation-fill-mode: both;
+    }
+    .ill[data-inview] .oil-fossil {
+      animation-name: ill-oil-fossil;
+    }
+    .ill[data-inview] .oil-follow {
+      animation-name: ill-oil-follow;
+    }
+    .ill[data-inview] .oil-premium {
+      animation-name: ill-oil-premium;
+    }
+    .ill[data-inview] .oil-arrow {
+      animation-name: ill-oil-arrow;
+    }
+    .ill[data-inview] .oil-a {
+      animation-name: ill-oil-a;
+    }
+    .ill[data-inview] .oil-b {
+      animation-name: ill-oil-b;
+    }
+  }
+
+  /* Part 05 calculator slider. Never combine ::-webkit-* and ::-moz-* in one rule: one unknown selector drops it. */
+  .calc-range {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 2.75rem;
+    background: transparent;
+    cursor: pointer;
+  }
+  .calc-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      var(--accent) var(--fill),
+      color-mix(in oklab, var(--fg) 14%, transparent) var(--fill)
+    );
+  }
+  .calc-range::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--fg) 14%, transparent);
+  }
+  .calc-range::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+  .calc-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--accent);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  }
+  .calc-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--accent);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  }
+  /* Keyboard focus rings the thumb itself (the input's own outline is dropped below); dragging gets a soft halo. */
+  .calc-range:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 4px var(--accent);
+  }
+  .calc-range:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 0 0 2px var(--card),
+      0 0 0 4px var(--accent);
+  }
+  .calc-range:active::-webkit-slider-thumb {
+    box-shadow: 0 0 0 6px var(--band);
+  }
+  .calc-range:active::-moz-range-thumb {
+    box-shadow: 0 0 0 6px var(--band);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .calc-range:hover::-webkit-slider-thumb {
+      scale: 1.1;
+    }
+    .calc-range:hover::-moz-range-thumb {
+      scale: 1.1;
+    }
+  }
+  .calc-tick {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .calc-range::-webkit-slider-thumb {
+      transition:
+        scale var(--m-dur-2) var(--m-ease-spring),
+        box-shadow var(--m-dur-2);
+    }
+    .calc-range::-moz-range-thumb {
+      transition:
+        scale var(--m-dur-2) var(--m-ease-spring),
+        box-shadow var(--m-dur-2);
+    }
+    .calc-tick {
+      animation: ill-tick 180ms var(--m-ease-out);
+    }
+  }
+
+  /* FAQ timeline: 300 units wide, so its labels get half a unit extra to stay >= 11px in a 294px phone column.
+     It plays when its <details> opens, not on scroll. */
+  .ill-tl text {
+    font-size: 11.5px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    details[open] .tl-axis {
+      animation: ill-tl-draw 500ms var(--m-ease-in-out) both;
+    }
+    details[open] .tl-seg {
+      transform-box: fill-box;
+      transform-origin: left;
+      animation: ill-tl-grow 500ms var(--m-ease-out) 150ms both;
+    }
+    details[open] .tl-dot {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: ill-tl-pop var(--m-dur-3) var(--m-ease-spring) var(--d, 500ms) both;
+    }
+  }
+}
+
+/* Unlayered, like the global focus ring it overrides: on the 44px-tall slider that ring cut through the label row
+   above. The thumb's own ring (above) carries keyboard focus instead. */
+.calc-range:focus-visible {
+  outline: none;
+}
+
+@keyframes ill-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+@keyframes ill-ping {
+  from {
+    scale: 1;
+    opacity: 0.6;
+  }
+  to {
+    scale: 2.6;
+    opacity: 0;
+  }
+}
+@keyframes ill-drop {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 152px;
+  }
+}
+/* Fig. 4 oil cycle. State A (expensive oil) at 0-15% and 85-100%, state B (cheap oil, authored) at 35-65%. */
+@keyframes ill-oil-fossil {
+  0%,
+  15%,
+  85%,
+  100% {
+    scale: 1 2.875; /* 16 -> 46 */
+  }
+  35%,
+  65% {
+    scale: 1 1;
+  }
+}
+@keyframes ill-oil-follow {
+  0%,
+  15%,
+  85%,
+  100% {
+    translate: 0 -30px;
+  }
+  35%,
+  65% {
+    translate: 0 0;
+  }
+}
+@keyframes ill-oil-premium {
+  0%,
+  15%,
+  85%,
+  100% {
+    scale: 1 0.348; /* 46 -> 16 */
+  }
+  35%,
+  65% {
+    scale: 1 1;
+  }
+}
+@keyframes ill-oil-arrow {
+  0%,
+  15%,
+  85%,
+  100% {
+    rotate: 180deg;
+  }
+  35%,
+  65% {
+    rotate: 0deg;
+  }
+}
+/* Labels hand over instead of crossfading: the old word is gone before the new one appears, so they never overlap. */
+@keyframes ill-oil-a {
+  0%,
+  15%,
+  85%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0;
+  }
+}
+@keyframes ill-oil-b {
+  0%,
+  25%,
+  75%,
+  100% {
+    opacity: 0;
+  }
+  35%,
+  65% {
+    opacity: 1;
+  }
+}
+@keyframes ill-tick {
+  from {
+    opacity: 0.4;
+    translate: 0 3px;
+  }
+}
+@keyframes ill-tl-draw {
+  from {
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 1.01;
+  }
+  to {
+    stroke-dasharray: 1 2;
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ill-tl-grow {
+  from {
+    scale: 0 1;
+  }
+}
+@keyframes ill-tl-pop {
+  from {
+    scale: 0;
+    opacity: 0;
+  }
+}
