@@ -1,192 +1,215 @@
-import type { CSSProperties, ReactNode } from "react";
-import { fmt } from "@/lib/format";
-import { dict, type Lang } from "@/lib/i18n";
-import { getLang } from "@/lib/lang.server";
-import { en } from "./explainer/en";
-import { nl } from "./explainer/nl";
+import type { ReactNode } from "react";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { sources, termLink, termLinks, type SourceId, type TermId } from "@/i18n/links";
+import { languageOf } from "@/i18n/routing";
+import { ERE_PER_KWH, EXAMPLE_FEE } from "@/lib/earnings";
 import ChargingPath from "./illustrations/ChargingPath";
-import EarningsCalc from "./illustrations/EarningsCalc";
+import EarningsCalculator from "./illustrations/EarningsCalculator";
 import EreUnit from "./illustrations/EreUnit";
 import ObligationFlow from "./illustrations/ObligationFlow";
 import PriceFormation from "./illustrations/PriceFormation";
 import YearTimeline from "./illustrations/YearTimeline";
 import YieldFormula from "./illustrations/YieldFormula";
 import "./illustrations/illustrations.css";
+import { stagger } from "./motion/stagger";
+import Term from "./Term";
 
-// NEa formula for grid electricity delivered in 2026: 0.505 × 183 g/MJ × 3.6 MJ/kWh / 1000.
-// 0.505 (CBS renewable share, two years before delivery year) changes every year.
-const ERE_PER_KWH = 0.3327;
-// Example fee of an inboekdienstverlener, used in the copy ("Bij bijvoorbeeld 20% kosten") and the calculator.
-const FEE = 0.2;
+/** The home-charging conditions in part 03, in reading order. Their keys match the data-parts in ChargingPath. */
+const CONDITIONS = ["meter", "loose", "grid", "kwh", "provider"] as const;
 
-const link = "underline underline-offset-2 hover:text-fg focus-visible:text-fg";
-// Stagger index for the reveal contract (data-reveal) in app/globals.css.
-const i = (n: number) => ({ "--i": n }) as CSSProperties;
+const linkClass = "underline underline-offset-2 hover:text-fg focus-visible:text-fg";
 
-// A part's body is its paragraphs (<p> elements); the layout around it is shared.
-type PartCopy = { title: string; caption: string; body: ReactNode };
+/**
+ * "Wat zijn ERE's?": five illustrated parts, the FAQ and the sources. The text is in messages/<locale>.json under
+ * Explainer, Terms and Sources.
+ *
+ * Terms in the text are tags around their words, e.g. "<ereUnit>ERE (emissiereductie-eenheid)</ereUnit>". Each tag
+ * becomes a <Term>: its link comes from i18n/links.ts, its one-line explanation from Terms.<id>.
+ */
+export default async function Explainer({ midPrice }: { midPrice: number }) {
+  const t = await getTranslations("Explainer");
+  const tTerms = await getTranslations("Terms");
+  const tSources = await getTranslations("Sources");
+  const tLinks = await getTranslations("Links");
+  const format = await getFormatter();
+  const language = languageOf(await getLocale());
 
-// The explainer text in one language (components/explainer/nl.tsx and en.tsx). Links come from explainer/links.ts.
-export type Copy = {
-  title: string;
-  // Intro text up to the in-page link to the sources, and that link's text.
-  intro: [string, string];
-  parts: {
-    what: PartCopy;
-    why: PartCopy;
-    earn: PartCopy;
-    price: PartCopy;
-    // Part 05 continues after its body: the small formula note, the value card, then `after`.
-    value: PartCopy & { note: ReactNode; after: ReactNode };
-  };
-  // Home-charging conditions in part 03, by data-key: hovering one lights up its part of ChargingPath.
-  conditions: Record<"meter" | "loose" | "grid" | "kwh" | "provider", ReactNode>;
-  card: { label: string; perKwh: string; text: (mid: string, net: string) => string };
-  faqTitle: string;
-  faq: Record<"self" | "public" | "provider" | "when" | "law", { q: string; a: ReactNode }>;
-  sourcesTitle: string;
-  sources: [label: string, href: string][];
-};
+  const termTags = Object.fromEntries(
+    (Object.keys(termLinks) as TermId[]).map((id) => [
+      id,
+      (words: ReactNode) => (
+        <Term link={termLink(id, language)} tip={tTerms(id)}>
+          {words}
+        </Term>
+      ),
+    ]),
+  );
+  const text = (key: Parameters<typeof t.rich>[0]) => t.rich(key, termTags);
+  const paragraphs = (...keys: Parameters<typeof t.rich>[0][]) => keys.map((key) => <p key={key}>{text(key)}</p>);
 
-const COPY: Record<Lang, Copy> = { nl, en };
+  const grossPerKwh = midPrice * ERE_PER_KWH;
 
-// Heading, illustrated plate and text. Mobile: stacked in that order; lg: the plate sits (sticky) beside the text.
-// The plate column is 18.125rem = 256px of drawing + p-4 + 1px borders, so the 256-wide viewBox renders 1:1.
-// Rows auto/1fr: the plate spans both, and its extra height goes to the text row, not between heading and text.
+  return (
+    <section id="uitleg" aria-labelledby="uitleg-titel" className="mt-16">
+      <h2 id="uitleg-titel" data-reveal="" className="text-2xl font-semibold tracking-tight">
+        {t("title")}
+      </h2>
+      <p data-reveal="" style={stagger(1)} className="mt-3 max-w-prose leading-relaxed text-muted">
+        {t.rich("intro", {
+          sources: (words) => (
+            <a href="#bronnen" className={linkClass}>
+              {words}
+            </a>
+          ),
+        })}
+      </p>
+
+      <div className="mt-8 space-y-16 lg:space-y-24">
+        <Part number="01" title={t("what.title")} caption={t("what.caption")} illustration={<EreUnit />}>
+          {paragraphs("what.p1", "what.p2")}
+        </Part>
+
+        <Part number="02" title={t("why.title")} caption={t("why.caption")} illustration={<ObligationFlow />}>
+          {paragraphs("why.p1", "why.p2", "why.p3", "why.p4")}
+        </Part>
+
+        <Part number="03" title={t("earn.title")} caption={t("earn.caption")} illustration={<ChargingPath />}>
+          {paragraphs("earn.p1", "earn.p2")}
+          {/* data-key: hovering a condition lights up its data-part in ChargingPath (illustrations.css). */}
+          <ul className="list-disc space-y-1.5 pl-5 marker:text-muted">
+            {CONDITIONS.map((condition) => (
+              <li key={condition} data-key={condition}>
+                {text(`earn.conditions.${condition}`)}
+              </li>
+            ))}
+          </ul>
+        </Part>
+
+        <Part number="04" title={t("price.title")} caption={t("price.caption")} illustration={<PriceFormation />}>
+          {paragraphs("price.p1", "price.p2", "price.p3")}
+        </Part>
+
+        <Part number="05" title={t("value.title")} caption={t("value.caption")} illustration={<YieldFormula />}>
+          {paragraphs("value.p1")}
+          <p className="text-sm text-muted">{text("value.note")}</p>
+          <div data-spotlight="" className="rounded-xl border border-line bg-card p-4">
+            <p className="text-xs text-muted">{t("value.card.label")}</p>
+            <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
+              <span data-countup={grossPerKwh} className="text-3xl font-semibold tracking-tight tabular-nums">
+                {format.number(grossPerKwh, "price")}
+              </span>
+              <span className="text-muted">{t("value.card.perKwh")}</span>
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-muted">
+              {t("value.card.explanation", {
+                mid: format.number(midPrice, "price"),
+                net: format.number(grossPerKwh * (1 - EXAMPLE_FEE), "price"),
+              })}
+            </p>
+            <EarningsCalculator midPrice={midPrice} />
+          </div>
+          {paragraphs("value.after")}
+        </Part>
+
+        <div className="max-w-prose">
+          <h3 data-reveal="" className="text-lg font-semibold tracking-tight">
+            {t("faq.title")}
+          </h3>
+          <div
+            data-reveal=""
+            data-spotlight=""
+            style={stagger(1)}
+            className="mt-3 divide-y divide-line rounded-xl border border-line bg-card"
+          >
+            <Faq question={t("faq.self.question")} answer={text("faq.self.answer")} />
+            <Faq question={t("faq.public.question")} answer={text("faq.public.answer")} />
+            <Faq question={t("faq.provider.question")} answer={text("faq.provider.answer")} />
+            <Faq question={t("faq.when.question")} answer={text("faq.when.answer")}>
+              <YearTimeline />
+            </Faq>
+            <Faq question={t("faq.law.question")} answer={text("faq.law.answer")} />
+          </div>
+        </div>
+
+        <div className="max-w-prose">
+          <h3 id="bronnen" data-reveal="" className="scroll-mt-(--header-h) text-lg font-semibold tracking-tight">
+            {tSources("title")}
+          </h3>
+          <ul data-reveal="fade" style={stagger(1)} className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-muted">
+            {(Object.keys(sources) as SourceId[]).map((id) => {
+              const source = sources[id];
+              const languageNote = source.lang !== language ? ` (${tLinks(`inLanguage.${source.lang}`)})` : "";
+              return (
+                <li key={id}>
+                  <a href={source.url} target="_blank" rel="noopener" className={linkClass}>
+                    {tSources(`labels.${id}`)}
+                    {languageNote}
+                    <span className="sr-only"> ({tLinks("newTab")})</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * A numbered part: heading, illustrated plate and text. On a phone they stack in that order; from lg the plate
+ * sits (sticky) beside the text.
+ *
+ * The plate column is 18.125rem = 256px of drawing + p-4 + 1px borders, so the 256-unit viewBox renders 1:1.
+ * Grid rows auto / 1fr: the plate spans both, and its extra height goes to the text row, not between heading and text.
+ */
 function Part({
-  n,
-  p,
+  number,
+  title,
+  caption,
   illustration,
   children,
 }: {
-  n: string;
-  p: PartCopy;
+  number: string;
+  title: string;
+  caption: string;
   illustration: ReactNode;
-  children?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="ill-part grid gap-x-12 gap-y-5 lg:grid-cols-[minmax(0,1fr)_18.125rem] lg:grid-rows-[auto_1fr]">
       <header data-reveal="" className="lg:col-start-1 lg:row-start-1">
-        <p className="text-xs font-semibold tracking-wider text-accent tabular-nums">{n}</p>
-        <h3 className="mt-1 text-lg font-semibold tracking-tight">{p.title}</h3>
+        <p className="text-xs font-semibold tracking-wider text-accent tabular-nums">{number}</p>
+        <h3 className="mt-1 text-lg font-semibold tracking-tight">{title}</h3>
       </header>
       <figure
         data-reveal=""
         data-spotlight=""
-        style={i(1)}
+        style={stagger(1)}
         className="ill ill-sticky w-full max-w-[22rem] self-start rounded-2xl border border-line bg-card p-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:max-w-none"
       >
         {illustration}
-        <figcaption className="mt-3 text-xs leading-relaxed text-muted">{p.caption}</figcaption>
+        <figcaption className="mt-3 text-xs leading-relaxed text-muted">{caption}</figcaption>
       </figure>
-      <div data-reveal="" style={i(2)} className="max-w-prose space-y-3 leading-relaxed lg:col-start-1 lg:row-start-2">
-        {p.body}
+      <div data-reveal="" style={stagger(2)} className="max-w-prose space-y-3 leading-relaxed lg:col-start-1 lg:row-start-2">
         {children}
       </div>
     </div>
   );
 }
 
-function Faq({ q, children }: { q: string; children: ReactNode }) {
+/** One FAQ question, as a disclosure. `children` (e.g. an illustration) follow the answer. */
+function Faq({ question, answer, children }: { question: string; answer: ReactNode; children?: ReactNode }) {
   return (
     <details data-disclosure="row">
       <summary className="min-h-11 px-4 py-3 font-medium transition-colors hover:text-accent focus-visible:text-accent">
-        {q}
+        {question}
       </summary>
-      <div className="space-y-3 px-4 pb-4 text-sm leading-relaxed text-muted">{children}</div>
-    </details>
-  );
-}
-
-export default async function Explainer({ midEur }: { midEur: number }) {
-  const lang = await getLang();
-  const c = COPY[lang];
-  const { eur } = fmt(lang);
-  const gross = midEur * ERE_PER_KWH;
-
-  return (
-    <section id="uitleg" aria-labelledby="uitleg-titel" className="mt-16">
-      <h2 id="uitleg-titel" data-reveal="" className="text-2xl font-semibold tracking-tight">
-        {c.title}
-      </h2>
-      <p data-reveal="" style={i(1)} className="mt-3 max-w-prose leading-relaxed text-muted">
-        {c.intro[0]}{" "}
-        <a href="#bronnen" className={link}>
-          {c.intro[1]}
-        </a>
-        .
-      </p>
-
-      <div className="mt-8 space-y-16 lg:space-y-24">
-        <Part n="01" p={c.parts.what} illustration={<EreUnit />} />
-        <Part n="02" p={c.parts.why} illustration={<ObligationFlow />} />
-        <Part n="03" p={c.parts.earn} illustration={<ChargingPath />}>
-          <ul className="list-disc space-y-1.5 pl-5 marker:text-muted">
-            {Object.entries(c.conditions).map(([key, text]) => (
-              <li key={key} data-key={key}>
-                {text}
-              </li>
-            ))}
-          </ul>
-        </Part>
-        <Part n="04" p={c.parts.price} illustration={<PriceFormation />} />
-        <Part n="05" p={c.parts.value} illustration={<YieldFormula />}>
-          <p className="text-sm text-muted">{c.parts.value.note}</p>
-          <div data-spotlight="" className="rounded-xl border border-line bg-card p-4">
-            <p className="text-xs text-muted">{c.card.label}</p>
-            <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
-              <span data-countup={gross} className="text-3xl font-semibold tracking-tight tabular-nums">
-                {eur(gross)}
-              </span>
-              <span className="text-muted">{c.card.perKwh}</span>
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-muted">{c.card.text(eur(midEur), eur(gross * (1 - FEE)))}</p>
-            <EarningsCalc midEur={midEur} erePerKwh={ERE_PER_KWH} fee={FEE} />
-          </div>
-          <p>{c.parts.value.after}</p>
-        </Part>
-
-        <div className="max-w-prose">
-          <h3 data-reveal="" className="text-lg font-semibold tracking-tight">
-            {c.faqTitle}
-          </h3>
-          <div
-            data-reveal=""
-            data-spotlight=""
-            style={i(1)}
-            className="mt-3 divide-y divide-line rounded-xl border border-line bg-card"
-          >
-            {Object.entries(c.faq).map(([key, f]) => (
-              <Faq key={key} q={f.q}>
-                {key === "when" ? (
-                  <>
-                    <p>{f.a}</p>
-                    <YearTimeline />
-                  </>
-                ) : (
-                  f.a
-                )}
-              </Faq>
-            ))}
-          </div>
-        </div>
-
-        <div className="max-w-prose">
-          <h3 id="bronnen" data-reveal="" className="scroll-mt-(--header-h) text-lg font-semibold tracking-tight">
-            {c.sourcesTitle}
-          </h3>
-          <ul data-reveal="fade" style={i(1)} className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-muted">
-            {c.sources.map(([label, href]) => (
-              <li key={href}>
-                <a href={href} target="_blank" rel="noopener" className={link}>
-                  {label}
-                  <span className="sr-only"> ({dict[lang].newTab})</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="space-y-3 px-4 pb-4 text-sm leading-relaxed text-muted">
+        {/* With something after it, the answer needs its own paragraph to keep the spacing. */}
+        {children ? <p>{answer}</p> : answer}
+        {children}
       </div>
-    </section>
+    </details>
   );
 }

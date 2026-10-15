@@ -1,68 +1,133 @@
 import { cacheLife } from "next/cache";
+import { HOUR_S, WEEK_MS } from "./time";
+import { isoWeekMonday } from "./week";
 
+// The weekly ERE market price, from Joulo's open price feed (https://developer.joulo.nl/guides/ere-price-feed).
+
+/** One weekly quote, in euros per ERE. */
 export type EreWeek = {
-  year: number; // ISO year
-  week: number; // ISO week
+  /** ISO week-numbering year. */
+  year: number;
+  /** ISO week number (1–53). */
+  week: number;
+  /** Monday of the week, in UTC milliseconds: the chart's x-axis. */
+  monday: number;
   bid: number;
   offer: number;
   mid: number;
-  date: number; // Monday of the ISO week, UTC ms
 };
 
-export type EreData = {
-  current: EreWeek & { updatedAt: string };
-  weeks: EreWeek[]; // oldest first, includes current
+export type ErePrices = {
+  current: EreWeek;
+  /** When Joulo entered the current week (ISO 8601). */
+  updatedAt: string;
+  /** Every week with a quote, oldest first, including the current one. */
+  weeks: EreWeek[];
 };
 
-const FEED = "https://joulo.nl/api/ere-price?weeks_back=104";
-const DAY = 864e5;
+/** The 104 weeks of history are the most the feed returns. */
+const FEED_URL = "https://joulo.nl/api/ere-price?weeks_back=104";
+const FEED_TIMEOUT_MS = 10_000;
 
-// ISO week 1 is the week containing 4 January.
-export function isoWeekMonday(year: number, week: number): number {
-  const jan4 = Date.UTC(year, 0, 4);
-  const dow = (new Date(jan4).getUTCDay() + 6) % 7; // Monday = 0
-  return jan4 + ((week - 1) * 7 - dow) * DAY;
-}
+/** A week as the feed sends it. Typed as unknown: it is outside data and gets checked before use. */
+type FeedWeek = {
+  year?: unknown;
+  week_number?: unknown;
+  bid_eur?: unknown;
+  offer_eur?: unknown;
+  mid_eur?: unknown;
+  updated_at?: unknown;
+};
 
-const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+type FeedResponse = {
+  ok?: unknown;
+  message?: unknown;
+  current?: FeedWeek;
+  history?: unknown;
+};
 
-function toWeek(row: unknown): EreWeek {
-  const r = (row ?? {}) as Record<string, unknown>;
-  const { year, week_number: week, bid_eur: bid, offer_eur: offer, mid_eur } = r;
-  if (!isNum(year) || !isNum(week) || !isNum(bid) || !isNum(offer)) {
-    throw new Error(`ERE feed: invalid row ${JSON.stringify(row)}`);
-  }
-  const mid = isNum(mid_eur) ? mid_eur : (bid + offer) / 2;
-  return { year, week, bid, offer, mid, date: isoWeekMonday(year, week) };
-}
-
-// Throws on any upstream failure so the cache keeps serving the last good result.
-export async function getEre(): Promise<EreData> {
+/**
+ * The current price and its history, cached on the server. Refreshed in the background once an hour; when the
+ * feed is down, the last good result keeps being served for up to a week.
+ *
+ * Throws on any upstream failure, so a failed refresh is never cached and the last good page stays up.
+ */
+export async function getErePrices(): Promise<ErePrices> {
   "use cache";
-  // Refresh hourly in the background; a stale entry survives up to a week of upstream outage.
-  cacheLife({ revalidate: 3600, expire: 7 * 24 * 3600 });
+  cacheLife({ revalidate: HOUR_S, expire: 7 * 24 * HOUR_S });
 
-  const res = await fetch(FEED, { signal: AbortSignal.timeout(10_000) });
-  if (!res.ok) throw new Error(`ERE feed: HTTP ${res.status}`);
-  const body = await res.json();
-  if (body?.ok !== true || !Array.isArray(body.history) || typeof body.current?.updated_at !== "string") {
-    throw new Error(`ERE feed: ${body?.message ?? "unexpected response"}`);
-  }
+  const feed = await fetchFeed();
 
-  const current = toWeek(body.current);
-  // Rows are entered by hand; skip a bad history row rather than failing every refresh.
-  const history: EreWeek[] = body.history.flatMap((r: unknown) => {
-    try {
-      return [toWeek(r)];
-    } catch {
-      return [];
-    }
-  });
-  const byWeek = new Map<string, EreWeek>();
-  for (const w of [...history, current]) byWeek.set(`${w.year}-${w.week}`, w);
+  const current = parseWeek(feed.current);
+  const updatedAt = feed.current?.updated_at;
+  if (!current || typeof updatedAt !== "string") throw new Error("ERE feed: no valid current week");
+  if (!Array.isArray(feed.history)) throw new Error("ERE feed: no history");
+
+  // Prices are entered by hand, so a malformed history row is skipped instead of failing the whole refresh.
+  const history = feed.history.map(parseWeek).filter((week) => week !== null);
+
+  return { current, updatedAt, weeks: mergeWeeks(history, current) };
+}
+
+async function fetchFeed(): Promise<FeedResponse> {
+  const response = await fetch(FEED_URL, { signal: AbortSignal.timeout(FEED_TIMEOUT_MS) });
+  if (!response.ok) throw new Error(`ERE feed: HTTP ${response.status}`);
+
+  const feed: FeedResponse = await response.json();
+  // The feed answers HTTP 200 even when it fails; ok: false and a message say so.
+  if (feed.ok !== true) throw new Error(`ERE feed: ${typeof feed.message === "string" ? feed.message : "unexpected response"}`);
+  return feed;
+}
+
+/** A checked week, or null when a field is missing or not a number. */
+function parseWeek(row: FeedWeek | undefined): EreWeek | null {
+  const { year, week_number: week, bid_eur: bid, offer_eur: offer, mid_eur: mid } = row ?? {};
+  if (!isNumber(year) || !isNumber(week) || !isNumber(bid) || !isNumber(offer)) return null;
 
   return {
-    current: { ...current, updatedAt: body.current.updated_at },
-    weeks: [...byWeek.values()].sort((a, b) => a.date - b.date),
+    year,
+    week,
+    monday: isoWeekMonday(year, week),
+    bid,
+    offer,
+    mid: isNumber(mid) ? mid : (bid + offer) / 2,
+  };
+}
+
+/** The feed may leave the current week out of its history: add it, without duplicates, sorted oldest first. */
+function mergeWeeks(history: EreWeek[], current: EreWeek): EreWeek[] {
+  const byWeek = new Map(history.map((week) => [week.monday, week]));
+  byWeek.set(current.monday, current);
+  return [...byWeek.values()].sort((a, b) => a.monday - b.monday);
+}
+
+function isNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+export type EreSummary = {
+  /** The latest quote before the current week; weeks without a quote are skipped. */
+  previous: EreWeek | undefined;
+  /** Mid price change since `previous`, in euros (0 when there is no previous week). */
+  change: number;
+  /** The highest and lowest mid price over the 52 weeks up to and including the current week. */
+  high: EreWeek;
+  low: EreWeek;
+  /** Offer minus bid, this week. */
+  spread: number;
+};
+
+/** The figures in the page's hero. */
+export function summarize({ current, weeks }: ErePrices): EreSummary {
+  const previous = weeks.filter((week) => week.monday < current.monday).at(-1);
+  // Never empty: it includes the current week.
+  const lastYear = weeks.filter((week) => week.monday > current.monday - 52 * WEEK_MS && week.monday <= current.monday);
+
+  return {
+    previous,
+    change: previous ? current.mid - previous.mid : 0,
+    high: lastYear.reduce((high, week) => (week.mid > high.mid ? week : high)),
+    low: lastYear.reduce((low, week) => (week.mid < low.mid ? week : low)),
+    spread: current.offer - current.bid,
   };
 }

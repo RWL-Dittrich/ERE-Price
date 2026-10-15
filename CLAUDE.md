@@ -6,118 +6,135 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-"ERE prijs" is a single-page Next.js 16 site showing the current and historic weekly Dutch ERE (emissiereductie-eenheid) market price, with an illustrated, fact-checked explainer about EREs. It will be hosted at https://ere.robindittrich.nl and self-hosted with `next start`. The site is bilingual: Dutch at `/nl`, English at `/en`. Every user-facing string needs both languages. Code and comments are English.
+"ERE prijs" is a single-page Next.js 16 site showing the current and historic weekly Dutch ERE (emissiereductie-eenheid) market price, with an illustrated, fact-checked explainer about EREs. It will be hosted at https://ere.robindittrich.nl and self-hosted with `next start`. The site is bilingual (Dutch at `/nl`, English at `/en`) with next-intl. Code and comments are English.
+
+Never run `git commit` or `git push` in this repo: the owner commits.
 
 ## Commands
 
 ```bash
 npm run dev     # dev server, http://localhost:3000
-npm run build   # production build; prerenders /nl and /en and FETCHES the live Joulo feed (fails if joulo.nl is unreachable)
+npm run build   # production build; prerenders /nl and /en-GB and FETCHES the live Joulo feed (fails if joulo.nl is unreachable)
 npm start       # production server
 npm run lint    # eslint (flat config, next core-web-vitals + typescript)
 npx tsc --noEmit
-npx next typegen          # regenerate route types (PageProps/LayoutProps, next/root-params) after moving routes
-node lib/i18n.check.ts    # self-check for Accept-Language detection
+npx next typegen               # regenerate route types (LayoutProps, next/root-params) after moving routes
+node i18n/messages.check.ts    # self-check: en-GB.json has the same keys, placeholders and tags as nl.json
+node lib/chart-axes.check.ts   # self-check: chart axis ticks
 ```
 
 There is no test suite. After any change:
 
-- `npm run build` must still list `/nl` and `/en` as static (`○`). The route table does not print revalidate columns for `[lang]` routes, so check `.next/prerender-manifest.json`: `routes["/nl"]` and `routes["/en"]` need `initialRevalidateSeconds: 3600` and `initialExpireSeconds: 604800`. If a route turns dynamic, or those values are missing, caching is broken.
-- For UI or motion changes, also check the running page in a browser: light and dark, 390px and desktop widths, and with `prefers-reduced-motion: reduce` emulated.
+- `npm run build` must list `/nl` and `/en-GB` as static (`○`) with Revalidate `1h` and Expire `1w` (also in `.next/prerender-manifest.json`: `initialRevalidateSeconds: 3600`, `initialExpireSeconds: 604800`). If a route turns dynamic, caching is broken.
+- After changing text, run `node i18n/messages.check.ts`.
+- For UI or motion changes, check the running page in a browser: /nl and /en, light and dark, 390px and desktop widths, and with `prefers-reduced-motion: reduce` emulated.
 
-## Architecture
+## Layout of the code
 
-Data flows one way:
+```
+messages/          nl.json and en-GB.json: ALL user-facing text, as ICU messages
+i18n/              next-intl setup: routing.ts, request.ts (named formats), links.ts, messages.check.ts
+global.d.ts        next-intl type config (typed keys, locales and format names)
+proxy.ts           next-intl middleware: "/" → /nl or /en, NEXT_LOCALE cookie
+app/[locale]/      layout.tsx (root layout: <html lang>, metadata, NextIntlClientProvider, footer), page.tsx, error.tsx
+lib/ere.ts         the price feed: getErePrices(), summarize()
+lib/week.ts        weekLabel(), isoWeekMonday() (client-safe)
+lib/earnings.ts    ERE_PER_KWH, EXAMPLE_FEE
+lib/chart-axes.ts  y-axis and month ticks for the chart
+components/        SiteHeader, Hero, SiteFooter, Explainer, Term, TipChip, LangSwitch, usePopover
+  chart/           PriceChart (client) with RangeToggle, PriceTooltip, PriceTable, ranges.ts
+  illustrations/   the explainer's SVG plates and the EarningsCalculator
+  motion/          MotionRoot, stagger(), useInView()
+```
 
-- `lib/ere.ts` provides the data.
-- `app/[lang]/page.tsx` is a server component that renders the site header (with the NL/EN `LangSwitch`), the hero, `components/EreChart.tsx` (client) and `components/Explainer.tsx` (server). It renders `MotionRoot` last.
-- `app/[lang]/layout.tsx` is the root layout. It holds only `<html lang>`/`<head>`, `generateStaticParams`, `generateMetadata` (with hreflang alternates) and the viewport export, the `LangProvider`, and the footer. `app/globals.css` and `app/icon.svg` stay at the app root.
+`app/[locale]/page.tsx` fetches the prices once and renders `SiteHeader`, `Hero`, `PriceChart`, `Explainer` and, last, `MotionRoot`. The header is in the page rather than the layout because its link targets `#uitleg`, which only exists on the page.
 
-**Languages**
+## Languages (next-intl)
 
-- `proxy.ts` (Next 16's name for middleware) handles `/` and `/nl`, `/en`:
-  - `/` gets a 307 redirect to the `lang` cookie if it is set, otherwise to the result of `detectLang(Accept-Language)`. A Dutch browser gets nl, any other language gets en, and no header at all (crawlers) gets nl.
-  - Visiting `/nl` or `/en` sets the cookie. That is how the switch "remembers" a choice.
-  - `LangSwitch` uses plain `<a>` links, not `next/link`, so the request passes the proxy and `<html lang>` is swapped.
-- `lib/i18n.ts` holds `LANGS`, `Lang`, `isLang`, `LOCALE` (nl-NL / en-GB), `detectLang`, and `dict` with the short shared UI strings. Long copy lives next to its component, in both languages.
-- Server components read the language with `await getLang()` (`lib/lang.server.ts`, which wraps `next/root-params`). Client components use `useLang()` from `components/LangProvider.tsx`, or receive `lang` as a prop (`EreChart`).
-- `Term` takes `hrefLang` when the linked page's language differs from the page's. The card then says "(in Dutch)" or "(Engelstalig)". Most sources are Dutch-only.
+- **All user-facing text lives in `messages/<locale>.json`**, never in components, and there is no per-language code. A component reads text with `getTranslations("Namespace")` (server) or `useTranslations("Namespace")` (client), and formats numbers and dates with `getFormatter()` / `useFormatter()` and the named formats in `i18n/request.ts` (`price`, `axisPrice`, `wholeEuros`, `integer`, `decimal`, `percent`; `date`, `month`, `updated`).
+- **Message syntax is ICU MessageFormat:**
+  - Variable parts are `{placeholders}`.
+  - Two-line SVG labels use `\n`; split them with `lines()` from `components/illustrations/svg.tsx`.
+  - Messages that contain tags are rendered with `t.rich()`.
+- `messages/nl.json` is the reference:
+  - `global.d.ts` types every key against it, so `t("Hero.titel")` is a compile error.
+  - `i18n/messages.check.ts` checks that `en-GB.json` has the same keys, placeholders and tags. TypeScript does not check that file.
+  - Keys must not contain dots.
+- **Locales:** `nl` and `en-GB`. English is en-GB for British number and date formats, but its URL is `/en` (`localePrefix.prefixes` in `i18n/routing.ts`; the middleware rewrites `/en` to the `/en-GB` page). Use `localePath(locale)` for URLs and `languageOf(locale)` ("nl"/"en") for comparing languages.
+- **Routing:** the middleware in `proxy.ts` (Next 16's name for middleware) sends `/` to the `NEXT_LOCALE` cookie's locale, or else to the best match for Accept-Language. Every non-Dutch language, and a missing header, gets English (the default locale). The cookie (one year) is set when a visitor views a language other than their browser's. `LangSwitch` uses plain `<a>` links so the request passes the middleware.
+- `i18n/request.ts` reads the locale from `next/root-params`, so pages stay static without `setRequestLocale`.
+- **Client components** only receive the namespaces listed in `CLIENT_NAMESPACES` in the layout (`Chart`, `Calculator`, `Links`, `Error`). A client component that needs another namespace must be added there.
 
-**Data and caching (`lib/ere.ts`)**
+## Data and caching (`lib/ere.ts`)
 
-- `getEre()` fetches `https://joulo.nl/api/ere-price?weeks_back=104`.
-- The project uses Next 16 Cache Components (`cacheComponents: true` in `next.config.ts`). Caching is therefore `"use cache"` plus `cacheLife({ revalidate: 3600, expire: 1 week })`. Route-segment `export const revalidate` does not exist in this mode.
-- `getEre()` deliberately **throws** on any upstream failure: an HTTP error, `ok: false`, a bad response shape, or the 10 s timeout. Nothing bad is cached, so the last good page keeps being served. `app/error.tsx` shows only after the cache entry has expired.
-- The feed always returns HTTP 200. A failure is signalled by `ok: false` in the body.
+- `getErePrices()` fetches `https://joulo.nl/api/ere-price?weeks_back=104` (the feed's maximum).
+- The project uses Next 16 Cache Components (`cacheComponents: true` in `next.config.ts`, which is wrapped by the next-intl plugin). Caching is therefore `"use cache"` plus `cacheLife({ revalidate: 1 hour, expire: 1 week })`. Route-segment `export const revalidate` does not exist in this mode.
+- `getErePrices()` deliberately **throws** on any upstream failure: an HTTP error, `ok: false`, a missing current week or history, or the 10 s timeout. A failed refresh is never cached, so the last good page keeps being served. `error.tsx` shows only after the cache entry has expired.
+- The feed always returns HTTP 200; a failure is signalled by `ok: false` in the body.
+- Feed quirks:
+  - The current week may be missing from the history. `mergeWeeks()` adds it without duplicates.
+  - Prices are entered by hand each week and weeks can be skipped. A malformed history row is dropped rather than failing the refresh.
+  - Each week gets `monday`, the UTC milliseconds of its ISO-week Monday (`isoWeekMonday()`), which is the chart's x-axis.
+- `summarize()` computes the hero's figures: the previous quote, the change, the 52-week high and low, and the spread.
+- `lib/ere.ts` imports `next/cache`, so client components may only import types from it. Client-safe helpers live in `lib/week.ts`, `lib/time.ts` and `lib/earnings.ts`.
 
-**Feed quirks handled in `getEre()`**
+## Chart (`components/chart/`)
 
-- `current` may be missing from `history`. It is merged in, deduplicated by ISO year + week.
-- Prices are entered by hand each week and weeks can be skipped. A malformed history row is dropped rather than failing the whole refresh.
-- Each week gets `date`, the UTC milliseconds of its ISO-week Monday (`isoWeekMonday`). The chart uses `date` as its x-axis.
+- recharts is the only charting dependency. The chart draws the mid-price line plus a bid–offer band.
+- `ranges.ts` defines the 3M/6M/1J/2J ranges; their labels are under `Chart.ranges.<key>`. `availableRanges()` offers a range only once the history reaches past the previous one, so 2J stays hidden while the feed has ≤ 52 weeks.
+- The y-axis ticks and domain come from `priceAxis()`, the month ticks from `monthTicks()` (`lib/chart-axes.ts`).
+- The series draw in once the plot is on screen (`useInView`). Recharts calls `PriceTooltip` through an arrow function so it renders as a component and may use hooks.
+- The plot is `aria-hidden` with `accessibilityLayer={false}`. The figcaption summary and `PriceTable` are the accessible alternative.
 
-**Formatting (`lib/format.ts`)**
+## Explainer
 
-- `fmt(lang)` returns `{ eur, pct, date }`. Prices are € with 3 decimals, in nl-NL (€ 0,365) or en-GB (€0.365) style. Other `Intl` formatters use `LOCALE[lang]`. `MotionRoot`'s count-up reads `<html lang>`.
-- Anything rendered by a client component uses numeric dates with `timeZone: "UTC"`, so server and client output match and hydration does not break.
-- Only server-only text (e.g. "Laatst bijgewerkt" / "Last updated" in `page.tsx`) uses `Europe/Amsterdam` and month names.
+- `components/Explainer.tsx` holds the structure: parts, illustrations, conditions list, value card, FAQ and sources. The text is under `Explainer`, `Terms` and `Sources` in the messages.
+- Every claim was fact-checked against primary sources (NEa, overheid, Joulo). Do not add facts that a listed source does not back. The English text says exactly the same as the Dutch; change a fact in both files.
+- **Terms** are tags in the text, e.g. `"<ereUnit>ERE (emissiereductie-eenheid)</ereUnit>"`.
+  - `Explainer` turns every tag into a `<Term>` (`components/Term.tsx`): a real link with a hover/focus/tap card.
+  - The card holds the tip `Terms.<id>` and a "Lees meer bij …" link.
+  - On touch, tapping the term only toggles its card; only the card's link opens the page.
+  - A tip may only restate what the text or its source says.
+- **Links** live in `i18n/links.ts`, never in the messages:
+  - `sources` holds the fact-checked sources, in the order of the sources list; their labels are under `Sources.labels`.
+  - `termLinks` maps every term id to a source or a glossary page. Glossary pages have a version per language where one exists.
+  - Each link knows its page language and site. The card's site name (`Links.sites`) and the "(in Dutch)" / "(Engelstalig)" note in cards and the sources list follow from that.
+  - Pick pages a general reader can follow: EUR-Lex and other raw legal texts are kept out of the running text on purpose.
+  - Adding a term: add the tag in both message files, `Terms.<id>` in both, and the id in `termLinks`.
+- `components/usePopover.ts` holds the open/close behaviour shared by `Term` and `TipChip`: hover, focus, Escape, and a press outside.
+- `ERE_PER_KWH = 0.3327` (`lib/earnings.ts`) is the NEa factor for electricity delivered in **2026**, and it changes every year. The explainer text and `YieldFormula`'s labels spell the formula out too, so update all of them together.
 
-**Chart (`components/EreChart.tsx`)**
+## Illustrations (`components/illustrations/`)
 
-- recharts, the only added runtime dependency.
-- Mid-price line plus bid–offer band.
-- 3M/6M/1J/2J range toggle. A range button appears only once the history reaches past the previous range, so 2J stays hidden while the feed has ≤ 52 weeks.
-- Y-axis ticks and domain are computed manually.
-- The series draw in when the plot enters view, via the chart's own IntersectionObserver.
-- The plot is `aria-hidden` with `accessibilityLayer={false}`. The figcaption summary and the "Toon gegevens als tabel" table are the accessible alternative.
+- There is one SVG plate per explainer part, built on `Plate` in `svg.tsx`: a 256-unit-wide viewBox with a `<title>`/`<desc>`. The labels are under `Illustrations.<plate>`.
+- Labels must fit their spot in both languages, so check /nl and /en after changing one. Labels may only restate what the text beside them says.
+- Animation timing is set per element with `delay(ms)` (the `--d` variable) and the `a-*` classes in `illustrations.css`, which `Explainer.tsx` imports.
 
-**Explainer (`components/Explainer.tsx` + `components/explainer/`)**
-
-- `Explainer.tsx` is the only copy of the structure: the parts, illustrations, conditions list, value card, FAQ and sources. It defines the `Copy` type.
-- `components/explainer/nl.tsx` and `en.tsx` each export a `Copy`: text, paragraphs and inline `Term`s only. Change a fact in both files.
-- `components/explainer/links.ts` holds the link maps (see below).
-- Every claim was fact-checked against primary sources (NEa, overheid, Joulo), listed in the sources list of each `Copy`. Do not add facts that are not backed by a listed source. The English text says exactly the same as the Dutch.
-- `ERE_PER_KWH = 0.3327` is the NEa factor for electricity delivered in **2026** (0.505 CBS renewable share × 183 g/MJ × 3.6 / 1000). It changes every year.
-- `FEE = 0.2` is an example inboekdienstverlener fee. It is used in the copy and in `EarningsCalc`.
-- Link targets live in `links.ts`:
-  - `S` holds the fact-checked sources, which also feed the "Bronnen" / "Sources" list. These are Dutch pages, so English Terms pointing at them set `hrefLang="nl"`.
-  - `E` holds background explanations (Wikipedia, CBS, RVO, NEa home) that are linked inline only.
-  - `E_EN` holds the English replacements used on /en (English Wikipedia, emissionsauthority.nl).
-  - Pick pages a general reader can follow: EUR-Lex and other raw legal texts were removed from the running text on purpose.
-- Terms in the text are wrapped in `components/Term.tsx`. Each Term is a real link with a hover/focus/tap card holding a one-line `tip` and a "Lees meer bij …" link. On touch, tapping the term only toggles its card and never navigates; only the card's "Lees meer" link opens the page. The site name comes from the `SITES` hostname map in `Term.tsx`, so a new domain needs an entry there. A `tip` may only restate what the text or its source says.
-- `components/usePopover.ts` holds the shared open/close behaviour for `Term` and `TipChip`: mouse hover, keyboard focus, Escape, and tap elsewhere to close.
-
-**Illustrations (`components/illustrations/`)**
-
-- There is one SVG plate per explainer part, built on `Plate` in `svg.tsx`: a 256-unit-wide viewBox with a `<title>`/`<desc>` in the page language. There is also the interactive `EarningsCalc` (kWh/year slider). Labels exist in both languages and must fit the 256-unit width in both, so check both /nl and /en after changing one.
-- Labels in a plate may only restate what the text beside it says.
-- `YieldFormula.tsx` repeats the NEa formula behind `ERE_PER_KWH`. When the yearly factor changes, update both.
-- Animation timing is set per element with the `d()` helper (`--d` delay) and the `a-*` classes in `illustrations.css`. `Explainer.tsx` imports that stylesheet.
-
-**Motion system (no animation library, by design; illustrations play once when scrolled into view, with no replay control)**
+## Motion system (no animation library, by design)
 
 - The attribute contract is documented in README.md ("Animaties"). The CSS lives in `app/globals.css` and `components/illustrations/illustrations.css`.
-- `components/motion/MotionRoot.tsx` sets `html[data-motion="on"]` after hydration. It turns `data-reveal` into `data-inview` and drives `data-countup` and `data-spotlight`.
-- `MotionRoot` is rendered at the end of `page.tsx`, not in the layout. It writes into page content, and that content must already be hydrated.
-- The authored markup is the final state. Every hidden or start state must sit behind `html[data-motion="on"]` and `prefers-reduced-motion: no-preference`, so the page is complete without JS, in print, and with reduced motion. The one exception is the hero intro (`.hero-in`). It is gated on `html[data-js]`, which an inline script in `layout.tsx` sets, and it finishes on its own.
-- Animate only `opacity`, the individual `translate`/`scale`/`rotate` properties and `stroke-dashoffset`, never `transform`. An element gets at most one animation role: a reveal, an `a-*` primitive, or a toggle state.
+- `components/motion/MotionRoot.tsx` sets `html[data-motion="on"]` after hydration. It turns `data-reveal` into `data-inview` and drives `data-countup` and `data-spotlight`. It is rendered at the end of the page, not in the layout, because it writes into page content that must already be hydrated.
+- The authored markup is the final state:
+  - Every hidden or start state must sit behind `html[data-motion="on"]` and `prefers-reduced-motion: no-preference`, so the page is complete without JS, in print, and with reduced motion.
+  - The one exception is the hero intro (`.hero-in`). It is gated on `html[data-js]`, which the inline script in the layout sets, and it finishes on its own.
+- Animate only `opacity`, the individual `translate`/`scale`/`rotate` properties and `stroke-dashoffset`, never `transform`. An element gets at most one animation role.
 - Hover effects use `@media (hover: hover)` and have a matching `:focus-visible` style.
-- Each `.hero-in` row is its own stacking context, so a popup inside one (like the `TipChip` tooltips on Bied/Laat) needs `relative z-10` on the row itself, not just on the popup.
-- `--i` is the stagger index. It is registered with `@property` as non-inheriting, set inline with the `at()`/`i()` helpers.
+- Each `.hero-in` row is its own stacking context, so a popup inside one (like the `TipChip` tooltips) needs `relative z-10` on the row itself.
+- `stagger(index)` sets `--i`, the stagger index, registered with `@property` as non-inheriting.
 
-**Styling**
+## Styling
 
 - Tailwind v4 with no config file.
 - Theme tokens are CSS variables on `:root` in `app/globals.css`, redefined under `prefers-color-scheme: dark`:
   - colors: `--page`, `--card`, `--popover`, `--fg`, `--muted`, `--line`, `--grid`, `--accent`, `--band`, `--up`, `--down`, `--spot`, `--glow`;
   - motion: `--m-ease-*`, `--m-dur-2..5`, `--m-stagger`, `--m-reveal-y`;
   - layout: `--header-h`.
-- Colors are exposed to Tailwind through `@theme inline` (`bg-card`, `text-muted`, `text-up`, …). Use the tokens rather than raw colors so both themes work. `--accent` was contrast-validated against `--card`.
+- Colors are exposed to Tailwind through `@theme inline` (`bg-card`, `text-muted`, …). Use the tokens rather than raw colors so both themes work.
 - Custom CSS goes inside `@layer components`, so Tailwind utilities always win over it.
 
 ## Constraints
 
-- External links open in a new tab (`target="_blank" rel="noopener"`) and carry an sr-only `dict[lang].newTab` note. Use `Term` in the explainer, `Out` in the layout, or copy the pattern. In-page anchors (`#uitleg`, `#bronnen`; the ids are the same in both languages) stay in the same tab.
+- External links open in a new tab (`target="_blank" rel="noopener"`) and carry an sr-only `Links.newTab` note. Use `Term` in the explainer or `ExternalLink` in `SiteFooter`, or copy the pattern. In-page anchors (`#uitleg`, `#bronnen`; the ids are the same in both languages) stay in the same tab.
 - **Attribution is required** (Joulo data is CC BY 4.0). Keep the citation with its links in the footer: "Bron: Joulo, ERE-marktprijs per week (joulo.nl/status), CC BY 4.0" on /nl and "Source: Joulo, ERE market price per week (joulo.nl/status), CC BY 4.0" on /en.
 - Prices are € per ERE, not per kWh. Bid and offer come from the LRE-E spot market; mid = (bid + offer) / 2.
 - Before using a Next.js API, check `node_modules/next/dist/docs/` (see AGENTS.md). For example, `error.tsx` receives `retry` (stable since 16.3).

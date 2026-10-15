@@ -1,10 +1,12 @@
-# ERE prijs
+# ⚡ ERE prijs
 
 Website met de actuele en historische ERE-marktprijs in Nederland (bied, laat en midden per emissiereductie-eenheid, per week), plus uitleg over ERE's voor wie thuis een elektrische auto laadt.
 
 ## Talen
 
-De site is tweetalig: Nederlands op `/nl`, Engels op `/en`. `proxy.ts` stuurt `/` door naar de taal van de browser (Nederlands bij een Nederlandstalige browser, anders Engels) of naar de laatst gekozen taal (cookie `lang`). Rechtsboven in de header staat een NL/EN-schakelaar.
+De site is tweetalig: Nederlands op `/nl`, Engels op `/en`, met [next-intl](https://next-intl.dev). De middleware in `proxy.ts` stuurt `/` door naar de laatst gekozen taal (cookie `NEXT_LOCALE`) of anders naar de taal van de browser: Nederlands bij een Nederlandstalige browser, anders Engels. Rechtsboven in de header staat een NL/EN-schakelaar.
+
+Alle teksten staan als ICU-berichten in `messages/nl.json` en `messages/en-GB.json`; componenten bevatten zelf geen tekst. Begrippen in de uitleg zijn tags in de tekst (`<ereUnit>…</ereUnit>`); hun links staan in `i18n/links.ts`. `nl.json` is leidend; `node i18n/messages.check.ts` controleert of `en-GB.json` dezelfde sleutels, placeholders en tags heeft.
 
 ## Data
 
@@ -14,20 +16,20 @@ Bron: Joulo, ERE-marktprijs per week ([joulo.nl/status](https://joulo.nl/status)
 
 ## Caching
 
-`getEre()` in `lib/ere.ts` gebruikt `"use cache"` met `cacheLife({ revalidate: 3600, expire: 7 * 24 * 3600 })`. Is de pagina ouder dan een uur, dan krijgt het eerstvolgende verzoek nog de bestaande versie en wordt de pagina op de achtergrond opnieuw opgebouwd; zonder bezoekers wordt er dus niets opgehaald. Bij een storing bij Joulo blijft de laatste goede versie tot een week bruikbaar. Pas daarna verschijnt de foutpagina (`app/[lang]/error.tsx`).
+`getErePrices()` in `lib/ere.ts` gebruikt `"use cache"` met `cacheLife({ revalidate: 1 uur, expire: 1 week })`. Is de pagina ouder dan een uur, dan krijgt het eerstvolgende verzoek nog de bestaande versie en wordt de pagina op de achtergrond opnieuw opgebouwd; zonder bezoekers wordt er dus niets opgehaald. Bij een storing bij Joulo blijft de laatste goede versie tot een week bruikbaar. Pas daarna verschijnt de foutpagina (`app/[locale]/error.tsx`).
 
 De site is bedoeld voor self-hosting met één `next start`-proces:
 
 - de `"use cache"`-data staat in het geheugen van het Node-proces (standaard cache handler) en is na een herstart weg;
 - de vooraf gerenderde pagina (ISR) staat op schijf in `.next/` en blijft na een herstart bewaard.
 
-`next build` rendert `/nl` en `/en` statisch vooraf en heeft daarvoor netwerktoegang tot joulo.nl nodig.
+`next build` rendert beide talen statisch vooraf (`/nl` en `/en-GB`, dat de middleware op `/en` aanbiedt) en heeft daarvoor netwerktoegang tot joulo.nl nodig.
 
 ## Animaties
 
-Animaties zijn CSS, aangestuurd door één klein clientcomponent en zonder animatiebibliotheek: `components/motion/MotionRoot.tsx` (in beeld komen, optellen, spotlight). Het contract staat in `app/globals.css` en MotionRoot; de grafiek tekent zich in via een eigen IntersectionObserver in `components/EreChart.tsx`.
+Animaties zijn CSS, aangestuurd door één klein clientcomponent en zonder animatiebibliotheek: `components/motion/MotionRoot.tsx` (in beeld komen, optellen, spotlight). Het contract staat in `app/globals.css` en MotionRoot; de grafiek tekent zich in zodra hij in beeld komt (`useInView` in `components/chart/PriceChart.tsx`).
 
-- `html[data-js]` (inline script in `app/[lang]/layout.tsx`) start alleen de CSS-intro van de hero; `html[data-motion="on"]` (MotionRoot, na hydratie) mag pas daarna iets verbergen.
+- `html[data-js]` (inline script in `app/[locale]/layout.tsx`) start alleen de CSS-intro van de hero; `html[data-motion="on"]` (MotionRoot, na hydratie) mag pas daarna iets verbergen.
 - `data-reveal` (`""` of `"fade"`) laat een element inkomen zodra MotionRoot er `data-inview` op zet; `--i` bepaalt de vertraging (stagger).
 - `data-spotlight` laat een kaart licht vangen onder de muis of bij toetsenbordfocus; `data-countup="<getal>"` telt een bedrag vanaf 85% op als het in beeld komt.
 - `details[data-disclosure]` geeft een uitklapblok een pijltje en een open-animatie.

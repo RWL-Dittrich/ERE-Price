@@ -1,0 +1,337 @@
+{
+  "Meta": {
+    "title": "ERE prijs – current Dutch ERE market price",
+    "description": "The current and historic ERE market price in the Netherlands: bid, offer and mid price per emission reduction unit, per week; fetched hourly from Joulo.",
+    "openGraphLocale": "en_GB"
+  },
+  "Header": {
+    "explainerLink": "What are EREs?",
+    "languageSwitch": "Language"
+  },
+  "Hero": {
+    "title": "Current ERE market price (mid)",
+    "perEre": "per ERE",
+    "comparedTo": "vs. {week}",
+    "change": {
+      "up": "up by",
+      "down": "down by",
+      "unchanged": "unchanged"
+    },
+    "bid": {
+      "label": "Bid",
+      "tip": "Bid price: what buyers on the LRE-E spot market are bidding for one ERE this week."
+    },
+    "offer": {
+      "label": "Offer",
+      "tip": "Offer price (ask): what sellers are asking for one ERE this week. The gap with the bid price is the spread."
+    },
+    "updated": "Last updated: {date}",
+    "high": "52-week high",
+    "low": "52-week low",
+    "spread": "Spread",
+    "spreadNote": "offer – bid"
+  },
+  "Chart": {
+    "title": "Price history",
+    "subtitle": "Weekly, in euros per ERE",
+    "rangeGroup": "Period",
+    "ranges": {
+      "3m": { "label": "3M", "name": "3 months" },
+      "6m": { "label": "6M", "name": "6 months" },
+      "1y": { "label": "1Y", "name": "1 year" },
+      "2y": { "label": "2Y", "name": "2 years" }
+    },
+    "legendMid": "Mid price",
+    "legendBand": "Bid–offer",
+    "noScript": "The chart needs JavaScript. The data is under ‘Show data as a table’.",
+    "summary": "Mid price per ERE over {range} ({count} weeks with data): from {from} in {fromWeek} to {to} in {toWeek}. Highest {high} ({highWeek}), lowest {low} ({lowWeek}).",
+    "tooltip": {
+      "monday": "Monday {date}",
+      "offer": "offer",
+      "mid": "mid",
+      "bid": "bid"
+    },
+    "table": {
+      "toggle": "Show data as a table",
+      "label": "ERE price per week",
+      "caption": "ERE price per week in euros over {range}, newest first",
+      "week": "Week",
+      "bid": "Bid",
+      "mid": "Mid",
+      "offer": "Offer"
+    }
+  },
+  "Calculator": {
+    "title": "Work it out",
+    "subtitle": "Indicative, per year, for electricity delivered in 2026",
+    "slider": "Charged at home per year",
+    "kwhPerYear": "{kwh} kWh per year",
+    "gross": "Gross",
+    "net": "After {percent}% fees",
+    "formula": "Current mid price × {erePerKwh} ERE per kWh × kWh per year. There is no fixed price for EREs; what you get depends on your registration service provider and the market."
+  },
+  "Links": {
+    "newTab": "opens in a new tab",
+    "readMore": "Read more at {site}",
+    "inLanguage": {
+      "nl": "in Dutch",
+      "en": "in English"
+    },
+    "sites": {
+      "nea": "the NEa",
+      "wikipedia": "Wikipedia",
+      "cbs": "CBS",
+      "rvo": "RVO",
+      "radar": "Radar",
+      "joulo": "Joulo",
+      "overheid": "the Dutch government"
+    }
+  },
+  "Footer": {
+    "source": "Source: Joulo, ERE market price per week",
+    "prices": "Prices in euros per ERE, entered weekly by Joulo; not every week has a quote. Data via the",
+    "priceFeed": "Joulo ERE price feed",
+    "madeWith": "Made with",
+    "love": "love",
+    "by": "by",
+    "linkedin": "Robin Dittrich on LinkedIn",
+    "github": "Robin Dittrich on GitHub"
+  },
+  "Error": {
+    "title": "The ERE price is temporarily unavailable",
+    "body": "The price data from Joulo could not be fetched. Please try again in a few minutes.",
+    "retry": "Try again"
+  },
+  "Explainer": {
+    "title": "What are EREs?",
+    "intro": "An explanation of emission reduction units for anyone who charges an electric car at home, and for anyone who wants to know what the price above is about. Point at an underlined term for a short explanation and a link to its source; all sources are listed <sources>at the bottom</sources>.",
+    "what": {
+      "title": "What is an ERE?",
+      "caption": "1 ERE = 1 kg CO₂-eq reduction compared with the fossil reference. At the transition, 1 HBE became 46 EREs.",
+      "p1": "An <ereUnit>ERE (emissiereductie-eenheid, emission reduction unit)</ereUnit> stands for 1 kilogram of <co2Equivalent>CO₂ equivalent</co2Equivalent> of emission reduction across the supply chain, measured against a fossil reference value set at European level. EREs are tradable units.",
+      "p2": "With the introduction of <red3>RED III</red3> in 2026, EREs replaced renewable fuel units (hernieuwbare brandstofeenheden, HBEs). 2025 was the last year with an <annualObligation>annual obligation</annualObligation> using tradable HBEs; on 1 January 2026 the <fuelTransitionObligation>brandstoftransitieverplichting (BTV, fuel transition obligation)</fuelTransitionObligation> with EREs took effect. After the year-end closing for 2025, remaining HBEs were <hbeConversion>converted into EREs</hbeConversion> of the same type on 1 May 2026, at 1 HBE = 46 EREs."
+    },
+    "why": {
+      "title": "Why do EREs exist?",
+      "caption": "Suppliers of renewable energy receive EREs; fuel suppliers buy them, and on 1 April they are deducted. The obligation in the land sector rises every year.",
+      "p1": "The system is meant to <transportEmissions>bring down CO₂ emissions from transport</transportEmissions> and implements the <red3Directive>European directive RED III</red3Directive>. Companies that supply renewable energy to transport receive 1 ERE per kilogram of supply-chain emission reduction, and those EREs are tradable.",
+      "p2": "<fuelSuppliers>Fuel suppliers</fuelSuppliers> that supply 500,000 litres or more a year to a transport sector (land, inland shipping or maritime shipping) have a fuel transition obligation there, expressed in EREs. Every year on 1 April, the required EREs are deducted from their account in the Register Energie Vervoer (REV, Energy for Transport Register); a limited share may be banked.",
+      "p3": "In the <landSector>land sector</landSector>, the required supply-chain emission reduction rises from 14.4% in 2026 via 16.5% (2027), 23.1% (2028) and 25.6% (2029) to 28.4% in 2030. Only EREs from the land sector (LREs) count towards it. For ERE-E from electricity there is no minimum or maximum.",
+      "p4": "The <nea>Nederlandse Emissieautoriteit (NEa, Dutch Emissions Authority)</nea> is market master and supervisor, and manages the <rev>REV</rev>. Only obligated companies, registrants (inboekers) and traders have an account there."
+    },
+    "earn": {
+      "title": "How do you earn EREs by charging?",
+      "caption": "You charge, the registration service provider registers: with your authorisation, based on the kWh measured at the charge point.",
+      "p1": "Electricity has its own kind of ERE: the <ereE>ERE-E</ereE>. It is created by registering (inboeken) electricity supplied to transport. Previously the revenue went mainly to operators of <publicChargePoints>public charge points</publicChargePoints>. Since 2026, <registrationProviders>inboekdienstverleners (registration service providers)</registrationProviders> may also register the charging of households with their own charge point, so that private individuals can receive revenue too.",
+      "p2": "As a private individual you may not register yourself; a registration service provider does it for you, with an authorisation. <homeChargingConditions>Conditions for home charging</homeChargingConditions>:",
+      "conditions": {
+        "meter": "Your charge point has a built-in <midCertified>MID-certified</midCertified> kWh meter. A charge point without an MID meter only counts if the <gridOperator>grid operator</gridOperator> has made a split behind which only the charge point uses electricity.",
+        "loose": "A separate, external MID meter is not enough: since January 2026 it has to be inside the charge point. Only companies that were already registering before 2026 get a transition year in 2026; private individuals do not.",
+        "grid": "You own the grid connection at your address.",
+        "kwh": "Only the kWh measured at the charge point count, and of those only the grid-average share of renewable electricity.",
+        "provider": "You sign up with one registration service provider at a time, with a contract of at least one full calendar year."
+      }
+    },
+    "price": {
+      "title": "How is the price set?",
+      "caption": "No exchange but over-the-counter trading; the mid price is the average of bid and offer. At the bottom, expensive oil alternates with cheap oil: the cheaper the oil, the bigger the green premium, and according to Joulo the ERE price can rise as a result.",
+      "p1": "There is no exchange for EREs. <joulo>According to Joulo</joulo>, they are traded <overTheCounter>over the counter (OTC)</overTheCounter> between buyer and seller, often through brokers who publish a weekly market update.",
+      "p2": "The prices on this site come from the weekly <priceFeed>ERE price feed from Joulo</priceFeed>: bid and offer prices in euros per ERE, entered by hand every week based on the LRE-E spot market. The mid price is the average of bid and offer. It is a price per ERE, not per kWh.",
+      "p3": "Demand is growing because the obligation rises every year. According to Joulo, itself a market participant, the ERE price follows the <greenPremium>‘green premium’</greenPremium>: the cost difference between fossil and renewable fuel. Cheaper oil can therefore actually push the ERE price up. It is a young, thin market with sizeable swings from week to week."
+    },
+    "value": {
+      "title": "What does it earn you?",
+      "caption": "From 1 kWh to 0.3327 ERE, and who pays: fuel suppliers through the market, not the government.",
+      "p1": "For grid electricity delivered in 2026, <neaFormula>the NEa calculates</neaFormula>: ERE-E = kWh × 0.505 × 183 g/MJ × 3.6 MJ/kWh ÷ 1000. That is 0.3327 ERE per kWh.",
+      "note": "0.505 is the share of renewable electricity in the Netherlands two years before the delivery year, as determined by <cbs>CBS</cbs> (50.5%). So this number changes every year. 183 g/MJ is the <fossilReference>fossil reference value</fossilReference> for electricity; for biofuels and renewable fuels it is 94 g/MJ. The multiplication factor of 4 that applied to HBEs no longer exists.",
+      "card": {
+        "label": "Indicative, gross per kWh charged at home in 2026",
+        "perKwh": "per kWh",
+        "explanation": "Current mid price {mid} per ERE × 0.3327 ERE per kWh, before the registration service provider's fees. With fees of 20%, for example, about {net} per kWh is left."
+      },
+      "after": "There is no fixed price for EREs. The registration service provider receives the EREs and can share the revenue with you. Some providers keep 10 to 30%, others charge a fixed subscription. <radar>Radar</radar> mentioned a payout of 7 to 10 cents per kWh in September 2026, depending on the market. It is not a government subsidy: fuel suppliers pay through the market."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "self": {
+        "question": "Can I register EREs myself?",
+        "answer": "No. <noSelfRegistration>Private individuals may not register themselves</noSelfRegistration>. An independent registrant needs a KvK (Dutch Chamber of Commerce) registration and must register <minimumVolume>at least 2 million kWh</minimumVolume> a year. So as a private individual you need a registration service provider."
+      },
+      "public": {
+        "question": "Do I get EREs when I charge in public?",
+        "answer": "Not yourself. Only the party listed in the <connectionRegister>Centraal Aansluitingenregister (CAR, central connection register)</connectionRegister> as the customer of the (primary) grid connection may register; a secondary allocation point alone is not enough. That is a legal requirement. So with public charging, the party with the connection registers, not the EV driver."
+      },
+      "provider": {
+        "question": "What should I look for in a registration service provider?",
+        "answer": "A <providerRequirements>registration service provider</providerRequirements> must be able to register at least 2 million kWh a year or have at least 200 authorisations, and an independent verifier checks every year that everything is correct. The NEa does not approve or accredit registration service providers and does not answer questions from private individuals. An authorisation applies to one or more full calendar years and is not renewed automatically. <radar>Radar</radar> warns against contracts longer than two years."
+      },
+      "when": {
+        "question": "When are EREs registered?",
+        "answer": "Electricity delivered in a given year can be registered <registrationDeadline>until 1 March</registrationDeadline> of the following year. The year-end closing follows on 1 April; EREs above the banking limit then expire."
+      },
+      "law": {
+        "question": "What is the legal basis?",
+        "answer": "In the Netherlands, the <environmentalAct>Wet milieubeheer (Environmental Management Act)</environmentalAct> (title 9.7, Hernieuwbare energie vervoer, on renewable energy for transport, and title 9.8, Raffinagereductie vervoersbrandstoffen, on refinery reduction for transport fuels), the Besluit energie vervoer (Energy for Transport Decree) and the Regeling energie vervoer (Energy for Transport Regulation); at European level, <red3Law>Directive (EU) 2023/2413 (RED III)</red3Law>. The act of 1 April 2026 amending the Wet milieubeheer and the Wet op de accijns (Excise Act), and the decree of 19 May 2026 amending the Besluit energie vervoer (Stb. 2026, 117), entered into force on 20 June 2026 with retroactive effect to 1 January 2026 (Stb. 2026, 137; except for one provision of the act). The official texts are listed under the sources."
+      }
+    }
+  },
+  "Terms": {
+    "ereUnit": "A tradable unit representing 1 kg of CO₂ equivalent of emission reduction across the supply chain.",
+    "co2Equivalent": "A measure for comparing greenhouse gases: the amount of CO₂ that causes the same amount of warming.",
+    "red3": "The revised European directive on renewable energy. The Netherlands has implemented it with EREs since 2026.",
+    "annualObligation": "The system up to and including 2025: fuel suppliers surrendered tradable HBEs every year.",
+    "fuelTransitionObligation": "The obligation for fuel suppliers since 1 January 2026, expressed in EREs.",
+    "hbeConversion": "On 1 May 2026, every remaining HBE was converted into 46 EREs of the same type.",
+    "transportEmissions": "The aim of the brandstoftransitie vervoer (fuel transition in transport): lower CO₂ emissions through renewable energy in transport.",
+    "red3Directive": "Directive (EU) 2023/2413, the revised European renewable energy directive. The NEa sets out the consequences for transport.",
+    "fuelSuppliers": "Companies that supply 500,000 litres or more of fuel a year to a transport sector. They must surrender EREs.",
+    "landSector": "Transport over land. Here the required supply-chain emission reduction rises from 14.4% in 2026 to 28.4% in 2030.",
+    "nea": "Market master and supervisor for EREs; manages the Register Energie Vervoer (Energy for Transport Register).",
+    "rev": "Register Energie Vervoer: it holds the ERE accounts of obligated companies, registrants and traders.",
+    "ereE": "The ERE for electricity supplied to transport, such as electricity to charge an electric car.",
+    "publicChargePoints": "With public charging, the party with the grid connection registers, not the EV driver. Until 2026 the revenue went mainly there.",
+    "registrationProviders": "Companies that register the electricity you charge with the NEa on your behalf. You give them an authorisation to do so.",
+    "homeChargingConditions": "The NEa document with the requirements for private individuals who have their charging electricity registered.",
+    "midCertified": "A kWh meter that meets the European Measuring Instruments Directive (MID, 2014/32/EU). The NEa requires one in the charge point.",
+    "gridOperator": "The company that manages the electricity grid in your area.",
+    "joulo": "Joulo registers its customers' charging sessions and is itself a market participant. The prices on this site also come from Joulo.",
+    "overTheCounter": "Over-the-counter: trading directly between two parties, not through an exchange.",
+    "priceFeed": "Open data from Joulo: the bid, offer and mid price per ERE every week, under the CC BY 4.0 licence.",
+    "greenPremium": "The cost difference between fossil and renewable fuel. According to Joulo, the ERE price follows this difference.",
+    "neaFormula": "The NEa page on registering electricity, with the calculation rule for ERE-E.",
+    "cbs": "Centraal Bureau voor de Statistiek (Statistics Netherlands). CBS determines the share of renewable electricity in the Netherlands.",
+    "fossilReference": "The emissions that the saving is measured against: 183 g/MJ for electricity, 94 g/MJ for biofuels.",
+    "radar": "The consumer programme of the Dutch broadcaster AVROTROS. Wrote about the ERE scheme in September 2026.",
+    "noSelfRegistration": "Private individuals always need a registration service provider.",
+    "minimumVolume": "The lower limit for an independent registrant, alongside a KvK registration.",
+    "connectionRegister": "The national register of all energy connections, kept by the grid operators.",
+    "providerRequirements": "Registers electricity for others. Requirement: 2 million kWh a year or 200 authorisations, with an annual check.",
+    "registrationDeadline": "Registering for a year is possible until 1 March; the year-end closing follows on 1 April.",
+    "environmentalAct": "The Dutch act whose titles 9.7 and 9.8 contain the rules for energy in transport. RVO (Netherlands Enterprise Agency) explains the system.",
+    "red3Law": "The revised European renewable energy directive. The NEa explains what changes for transport."
+  },
+  "Sources": {
+    "title": "Sources",
+    "labels": {
+      "neaEres": "NEa – EREs",
+      "neaFuelTransition": "NEa – What is the fuel transition in transport?",
+      "neaRed3Changes": "NEa – Main RED III changes",
+      "neaYearEnd2025": "NEa – First results of the 2025 year-end closing",
+      "neaHbeToEre": "NEa – Transition from HBE to ERE: rules and provisions",
+      "neaObligations": "NEa – Fuel transition obligations",
+      "neaLandSector": "NEa – Fuel deliveries in the land sector",
+      "neaRegisteringElectricity": "NEa – Registering electricity",
+      "neaRegistrationProviders": "NEa – Registration service providers",
+      "neaPrivateIndividuals": "NEa – Registering electricity by private individuals",
+      "neaSecondaryAllocationPoint": "NEa – Registering from a secondary allocation point",
+      "environmentalManagementAct": "Wet milieubeheer, Environmental Management Act – wetten.overheid.nl",
+      "staatsblad2026_117": "Staatsblad 2026, 117 – amendment of the Besluit energie vervoer",
+      "staatsblad2026_137": "Staatsblad 2026, 137 – entry into force",
+      "rijksoverheidChargePointIncome": "Rijksoverheid – Can I earn money with my own charge point?",
+      "radarHomeCharging": "Radar – Earning money by charging your electric car at home",
+      "jouloTrading": "Joulo – Trading in ERE",
+      "jouloPriceFeed": "Joulo – ERE price feed",
+      "jouloYieldFeed": "Joulo – ERE revenue feed",
+      "jouloGreenPremium": "Joulo – Why the ERE price rose 7%"
+    }
+  },
+  "Illustrations": {
+    "ereUnit": {
+      "title": "What an ERE is",
+      "description": "An ERE stands for 1 kilogram of CO₂-equivalent emission reduction across the supply chain, relative to the fossil reference value. Remaining HBEs were converted on 1 May 2026: 1 HBE became 46 EREs.",
+      "unit": "UNIT",
+      "fossil": "fossil\nreference",
+      "renewable": "renewable\nenergy",
+      "reduction": "reduction",
+      "conversion": "CONVERSION 2026",
+      "until": "through 2025",
+      "date": "1 May 2026",
+      "result": "46 EREs"
+    },
+    "obligationFlow": {
+      "title": "How the obligation works",
+      "description": "In the Register Energie Vervoer (REV, Energy for Transport Register), managed by the NEa, a supplier of renewable energy receives 1 ERE per kilogram of reduction. EREs are traded to fuel suppliers that supply 500,000 litres or more per year; on 1 April they are deducted. Required supply-chain emission reduction in the land sector: 14.4% in 2026, 16.5% in 2027, 23.1% in 2028, 25.6% in 2029 and 28.4% in 2030; only LREs count.",
+      "register": "Register Energie Vervoer (REV)",
+      "managedBy": "managed and supervised by the NEa",
+      "account": "account",
+      "renewable": "renewable\nenergy",
+      "fuelSupplier": "fuel\nsupplier",
+      "perKg": "1 ERE per kg",
+      "volume": "≥ 500,000 l/yr",
+      "trade": "trade",
+      "deducted": "1 April: deducted",
+      "obligation": "OBLIGATION · LAND SECTOR",
+      "obligationNote": "supply-chain emission reduction · LREs only"
+    },
+    "chargingPath": {
+      "title": "Charging at home and ERE-E",
+      "description": "Electricity flows from your grid connection through the charge point with its built-in MID meter to the car. The measured kWh go, with your authorisation, to a registration service provider, which registers them as ERE-E. You may not register them yourself, and a separate external meter is not enough.",
+      "gridConnection": "your\ngrid connection",
+      "chargePoint": "charge point with\nMID meter",
+      "car": "car",
+      "separateMeter": "separate meter",
+      "measuredKwh": "measured kWh",
+      "authorisation": "authorisation",
+      "provider": "registration\nservice provider",
+      "registers": "registers",
+      "noSelfRegistration": "no self-registration"
+    },
+    "priceFormation": {
+      "title": "How the ERE price is formed",
+      "description": "EREs are traded over the counter (OTC) between buyer and seller, often via brokers with a weekly market update; there is no exchange. The mid price lies exactly between bid and offer: (bid + offer) ÷ 2. According to Joulo, the price follows the green premium, the cost difference between fossil and renewable fuel. More expensive oil makes that difference smaller; cheaper oil makes it larger and can push the ERE price up.",
+      "overTheCounter": "OVER THE COUNTER · NO EXCHANGE",
+      "buyer": "buyer",
+      "seller": "seller",
+      "broker": "broker · weekly market update",
+      "pricePerEre": "PRICE PER ERE",
+      "lower": "lower",
+      "higher": "higher",
+      "bid": "bid",
+      "offer": "offer",
+      "mid": "mid",
+      "midFormula": "(bid + offer) ÷ 2",
+      "greenPremiumHeading": "GREEN PREMIUM · PER JOULO",
+      "greenPremiumNote": "cost gap between fossil and renewable",
+      "fossil": "fossil",
+      "renewable": "renewable",
+      "cheaperOil": "cheaper oil",
+      "pricierOil": "pricier oil",
+      "greenPremium": "green premium",
+      "erePrice": "ERE price",
+      "canRise": "can rise",
+      "canFall": "can fall"
+    },
+    "yieldFormula": {
+      "title": "What a kWh yields",
+      "description": "For electricity delivered in 2026: 1 kWh × 0.505 (renewable share of electricity, CBS) × 183 g/MJ (fossil reference value) × 3.6 MJ/kWh ÷ 1,000 = 0.3327 ERE. The HBE multiplier of 4 no longer exists. Fuel suppliers pay via the market; the registration service provider can share the proceeds with you and sometimes keeps 10 to 30% or charges a subscription. It is not a subsidy.",
+      "delivered": "ELECTRICITY DELIVERED IN 2026",
+      "factors": {
+        "renewableShare": "× 0.505",
+        "renewableShareNote": "renewable share (CBS)",
+        "fossilReference": "× 183 g/MJ",
+        "fossilReferenceNote": "fossil reference",
+        "energy": "× 3.6 MJ/kWh",
+        "grams": "÷ 1,000"
+      },
+      "result": "0.3327 ERE",
+      "noLongerExists": "no longer exists",
+      "whoPays": "NO SUBSIDY · VIA THE MARKET",
+      "payers": {
+        "fuelSuppliers": "fuel suppliers",
+        "provider": "registration service provider",
+        "you": "you"
+      },
+      "payViaMarket": "pay via the market",
+      "sharing": "can share the proceeds\nsometimes keeps 10–30%,\nor charges a subscription"
+    },
+    "yearTimeline": {
+      "title": "Register by 1 March, year-end closing on 1 April",
+      "delivered": "electricity delivered",
+      "nextYear": "next year",
+      "registerBy": "register by",
+      "march": "1 March",
+      "closing": "year-end closing",
+      "april": "1 April"
+    }
+  }
+}

@@ -1,22 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { detectLang, isLang } from "@/lib/i18n";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
 
-const COOKIE = "lang";
+// Language routing by next-intl (see i18n/routing.ts): redirects "/" to /nl or /en, maps /en to the en-GB
+// locale, and remembers a chosen language in the NEXT_LOCALE cookie. The pages themselves stay static.
+export default createMiddleware(routing);
 
-// "/" redirects to /nl or /en: the language last viewed (cookie), else the browser's language. Viewing /nl or /en
-// (also via the language switch) remembers that choice. The pages themselves stay static.
-export function proxy(request: NextRequest) {
-  const segment = request.nextUrl.pathname.split("/")[1];
-  if (isLang(segment)) {
-    const response = NextResponse.next();
-    if (request.cookies.get(COOKIE)?.value !== segment) {
-      response.cookies.set(COOKIE, segment, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
-    }
-    return response;
-  }
-  const saved = request.cookies.get(COOKIE)?.value;
-  const lang = isLang(saved) ? saved : detectLang(request.headers.get("accept-language"));
-  return NextResponse.redirect(new URL(`/${lang}`, request.url));
-}
-
-export const config = { matcher: ["/", "/nl", "/en"] };
+export const config = {
+  // Every page path, but not Next.js internals or files with an extension (icon.svg).
+  matcher: "/((?!api|_next|_vercel|.*\\..*).*)",
+};
