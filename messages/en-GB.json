@@ -118,6 +118,13 @@
     "linkedin": "Robin Dittrich on LinkedIn",
     "github": "Robin Dittrich on GitHub"
   },
+  "Consent": {
+    "label": "Cookie consent",
+    "text": "May we use Google Analytics to measure how visitors use this site? Google sets cookies to do so. You can change your choice at the bottom of the page at any time.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "settings": "Cookie settings"
+  },
   "Error": {
     "title": "The ERE price is temporarily unavailable",
     "body": "The price data from Joulo could not be fetched. Please try again in a few minutes.",

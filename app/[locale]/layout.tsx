@@ -2,9 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Geist } from "next/font/google";
+import Analytics from "@/components/Analytics";
 import SiteFooter from "@/components/SiteFooter";
 import { localePath, routing } from "@/i18n/routing";
-import { SITE_URL } from "@/lib/site";
+import { GA_ID, SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -13,7 +14,7 @@ const geistSans = Geist({
 });
 
 /** The message namespaces that client components read; the rest (mostly the explainer) stays on the server. */
-const CLIENT_NAMESPACES = ["Chart", "Calculator", "Links", "Error"] as const;
+const CLIENT_NAMESPACES = ["Chart", "Calculator", "Links", "Error", "Consent"] as const;
 
 /** One static page per locale: /nl and /en. "/" itself is redirected by proxy.ts. */
 export function generateStaticParams() {
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         <NextIntlClientProvider messages={clientMessages}>
           {children}
           <SiteFooter />
+          {GA_ID && <Analytics />}
         </NextIntlClientProvider>
       </body>
     </html>

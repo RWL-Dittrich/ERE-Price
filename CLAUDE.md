@@ -59,6 +59,13 @@ components/        SiteHeader, Hero, SiteFooter, Explainer, Term, TipChip, LangS
 - The middleware matcher in `proxy.ts` skips `opengraph-image`: Next links the English image as `/en-GB/opengraph-image`, and the middleware would redirect that to a broken URL.
 - `npm run build` must also list `/nl/opengraph-image` and `/en-GB/opengraph-image` as `●` with `1h`/`1w`, and `/robots.txt` and `/sitemap.xml` as static.
 
+## Analytics (`components/Analytics.tsx`)
+
+- Google Analytics 4 loads only after consent. Until the visitor presses "Akkoord", no Google script loads and no cookie is set (basic consent mode). Ad signals and Google signals are off.
+- The choice is kept in localStorage (`ere-consent`). The footer's "Cookie-instellingen" (`ConsentSettings`) reopens the banner. Declining after accepting turns consent off and deletes the `_ga*` cookies.
+- The banner appears only after hydration, so the static page never contains it. Accept and Decline look the same on purpose: declining must be as easy as accepting.
+- `GA_ID` in `lib/site.ts` switches all of it. Empty means no analytics, no banner and no footer link.
+
 ## Units: ERE / kWh (`components/unit.tsx`)
 
 - The hero's `UnitToggle` switches every price in the hero and the chart between per ERE and per kWh (× `ERE_PER_KWH`). `UnitProvider` in `page.tsx` holds the setting. It starts at ERE on every visit, so the static page matches; the explainer always shows both.

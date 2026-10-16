@@ -118,6 +118,13 @@
     "linkedin": "Robin Dittrich op LinkedIn",
     "github": "Robin Dittrich op GitHub"
   },
+  "Consent": {
+    "label": "Cookietoestemming",
+    "text": "Mogen we met Google Analytics meten hoe bezoekers deze site gebruiken? Google plaatst daarvoor cookies. Je keuze kun je onderaan de pagina altijd wijzigen.",
+    "accept": "Akkoord",
+    "decline": "Weigeren",
+    "settings": "Cookie-instellingen"
+  },
   "Error": {
     "title": "De ERE-prijs is even niet beschikbaar",
     "body": "De prijsgegevens van Joulo konden niet worden opgehaald. Probeer het over een paar minuten opnieuw.",

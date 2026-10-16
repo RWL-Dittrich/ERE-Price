@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { languageOf } from "@/i18n/routing";
+import { GA_ID } from "@/lib/site";
+import { ConsentSettings } from "./Analytics";
 
 const LINKEDIN_URL = "https://nl.linkedin.com/in/robin-dittrich-b43b92195";
 const GITHUB_URL = "https://github.com/RWL-Dittrich";
 
-/** Data attribution (required by Joulo's CC BY 4.0 licence) and the maker's credit. */
+/** Data attribution (required by Joulo's CC BY 4.0 licence), the cookie settings (with GA_ID) and the maker's credit. */
 export default async function SiteFooter() {
   const language = languageOf(await getLocale());
   const t = await getTranslations("Footer");
@@ -30,6 +32,11 @@ export default async function SiteFooter() {
             {t("priceFeed")}
           </ExternalLink>
         </p>
+        {GA_ID && (
+          <p>
+            <ConsentSettings label={(await getTranslations("Consent"))("settings")} />
+          </p>
+        )}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
           <p>
             {t("madeWith")}{" "}
