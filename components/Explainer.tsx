@@ -19,6 +19,9 @@ const CONDITIONS = ["meter", "loose", "grid", "kwh", "provider"] as const;
 
 const linkClass = "underline underline-offset-2 hover:text-fg focus-visible:text-fg";
 
+/** The FAQ questions, in order, under Explainer.faq.<id>. StructuredData lists the same ones as an FAQPage. */
+export const FAQ_IDS = ["self", "public", "provider", "when", "law"] as const;
+
 /**
  * "Wat zijn ERE's?": five illustrated parts, the FAQ and the sources. The text is in messages/<locale>.json under
  * Explainer, Terms and Sources.
@@ -89,8 +92,16 @@ export default async function Explainer({ midPrice }: { midPrice: number }) {
           {paragraphs("price.p1", "price.p2", "price.p3")}
         </Part>
 
-        <Part number="05" title={t("value.title")} caption={t("value.caption")} illustration={<YieldFormula />}>
+        {/* #rekenhulp: the header's calculator link lands on this part's heading. */}
+        <Part id="rekenhulp" number="05" title={t("value.title")} caption={t("value.caption")} illustration={<YieldFormula />}>
           {paragraphs("value.p1")}
+          {/* Each factor stays whole, so on a narrow screen the formula only breaks between factors. */}
+          <p className="border-l-2 border-accent py-1 pl-4 tabular-nums">
+            <span className="flex flex-wrap gap-x-1">
+              {t.rich("value.formula", { part: (chunks) => <span className="whitespace-nowrap">{chunks}</span> })}
+            </span>
+            <span className="mt-1 block font-semibold text-accent">{t("value.formulaResult")}</span>
+          </p>
           <p className="text-sm text-muted">{text("value.note")}</p>
           <div data-spotlight="" className="rounded-xl border border-line bg-card p-4">
             <p className="text-xs text-muted">{t("value.card.label")}</p>
@@ -121,13 +132,11 @@ export default async function Explainer({ midPrice }: { midPrice: number }) {
             style={stagger(1)}
             className="mt-3 divide-y divide-line rounded-xl border border-line bg-card"
           >
-            <Faq question={t("faq.self.question")} answer={text("faq.self.answer")} />
-            <Faq question={t("faq.public.question")} answer={text("faq.public.answer")} />
-            <Faq question={t("faq.provider.question")} answer={text("faq.provider.answer")} />
-            <Faq question={t("faq.when.question")} answer={text("faq.when.answer")}>
-              <YearTimeline />
-            </Faq>
-            <Faq question={t("faq.law.question")} answer={text("faq.law.answer")} />
+            {FAQ_IDS.map((id) => (
+              <Faq key={id} question={t(`faq.${id}.question`)} answer={text(`faq.${id}.answer`)}>
+                {id === "when" && <YearTimeline />}
+              </Faq>
+            ))}
           </div>
         </div>
 
@@ -164,12 +173,15 @@ export default async function Explainer({ midPrice }: { midPrice: number }) {
  * Grid rows auto / 1fr: the plate spans both, and its extra height goes to the text row, not between heading and text.
  */
 function Part({
+  id,
   number,
   title,
   caption,
   illustration,
   children,
 }: {
+  /** An anchor on the part's heading. */
+  id?: string;
   number: string;
   title: string;
   caption: string;
@@ -178,7 +190,7 @@ function Part({
 }) {
   return (
     <div className="ill-part grid gap-x-12 gap-y-5 lg:grid-cols-[minmax(0,1fr)_18.125rem] lg:grid-rows-[auto_1fr]">
-      <header data-reveal="" className="lg:col-start-1 lg:row-start-1">
+      <header id={id} data-reveal="" className="lg:col-start-1 lg:row-start-1">
         <p className="text-xs font-semibold tracking-wider text-accent tabular-nums">{number}</p>
         <h3 className="mt-1 text-lg font-semibold tracking-tight">{title}</h3>
       </header>

@@ -4,6 +4,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Geist } from "next/font/google";
 import SiteFooter from "@/components/SiteFooter";
 import { localePath, routing } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -19,22 +20,19 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+/** The fallback metadata. The page replaces the title and description with ones that carry the current price. */
 export async function generateMetadata(): Promise<Metadata> {
   const path = localePath(await getLocale());
   const t = await getTranslations("Meta");
   return {
-    metadataBase: new URL("https://ere.robindittrich.nl"),
+    metadataBase: new URL(SITE_URL),
     title: t("title"),
     description: t("description"),
+    // Google ignores keywords; Bing gives them a little weight.
+    keywords: t("keywords").split(", "),
     alternates: { canonical: path, languages: { nl: "/nl", en: "/en", "x-default": "/" } },
-    openGraph: {
-      title: t("title"),
-      description: t("description"),
-      url: path,
-      siteName: "ERE prijs",
-      locale: t("openGraphLocale"),
-      type: "website",
-    },
+    // X falls back to the og: title, description and image.
+    twitter: { card: "summary_large_image" },
   };
 }
 

@@ -6,6 +6,7 @@ import { routing } from "./i18n/routing";
 export default createMiddleware(routing);
 
 export const config = {
-  // Every page path, but not Next.js internals or files with an extension (icon.svg).
-  matcher: "/((?!api|_next|_vercel|.*\\..*).*)",
+  // Every page path, but not Next.js internals, files with an extension (icon.svg, robots.txt, sitemap.xml) or the
+  // share image: Next links it as /en-GB/opengraph-image, which the middleware would redirect to a broken URL.
+  matcher: "/((?!api|_next|_vercel|.*opengraph-image|.*\\..*).*)",
 };

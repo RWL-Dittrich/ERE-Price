@@ -1,4 +1,4 @@
-# ⚡ ERE prijs
+# ⚡ ERE Index
 
 Website met de actuele en historische ERE-marktprijs in Nederland (bied, laat en midden per emissiereductie-eenheid, per week), plus uitleg over ERE's voor wie thuis een elektrische auto laadt.
 

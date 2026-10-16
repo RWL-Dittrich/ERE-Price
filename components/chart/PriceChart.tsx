@@ -4,24 +4,28 @@ import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { monthTicks, priceAxis } from "@/lib/chart-axes";
+import { ERE_PER_KWH } from "@/lib/earnings";
 import type { EreWeek } from "@/lib/ere";
 import { weekLabel } from "@/lib/week";
 import { stagger } from "../motion/stagger";
 import { useInView } from "../motion/useInView";
+import Segmented from "../Segmented";
+import { useUnit } from "../unit";
 import PriceTable from "./PriceTable";
 import PriceTooltip from "./PriceTooltip";
-import RangeToggle from "./RangeToggle";
 import { DEFAULT_RANGE, availableRanges, weeksInRange, type RangeKey } from "./ranges";
 
 const axisTick = { fill: "var(--muted)", fontSize: 12 };
 
-/** The weekly mid price as a line, with the bid–offer spread as a band around it. */
+/** The weekly mid price as a line, with the bid–offer spread as a band around it, per ERE or per kWh (UnitToggle). */
 export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
   const t = useTranslations("Chart");
   const format = useFormatter();
   const price = (euro: number) => format.number(euro, "price");
   // The series draw in once the plot is on screen (recharts skips the animation under reduced motion).
   const [plotRef, plotInView] = useInView<HTMLDivElement>(0.3);
+  const { unit } = useUnit();
+  const factor = unit === "kwh" ? ERE_PER_KWH : 1;
 
   const ranges = availableRanges(weeks);
   const [selectedKey, setSelectedKey] = useState<RangeKey>(DEFAULT_RANGE);
@@ -29,7 +33,13 @@ export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
   const range = ranges.find((r) => r.key === selectedKey) ?? ranges[ranges.length - 1];
   const rangeName = t(`ranges.${range.key}.name`);
 
-  const shown = weeksInRange(weeks, range);
+  // Converted once here, so the axis, tooltip, summary and table below all follow the unit.
+  const shown = weeksInRange(weeks, range).map((week) => ({
+    ...week,
+    bid: week.bid * factor,
+    mid: week.mid * factor,
+    offer: week.offer * factor,
+  }));
   const first = shown[0];
   const last = shown[shown.length - 1];
   const chartData = shown.map((week) => ({ ...week, band: [week.bid, week.offer] }));
@@ -39,6 +49,7 @@ export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
   const high = shown.reduce((best, week) => (week.mid > best.mid ? week : best));
   const low = shown.reduce((best, week) => (week.mid < best.mid ? week : best));
   const summary = t("summary", {
+    unit,
     range: rangeName,
     count: shown.length,
     from: price(first.mid),
@@ -58,9 +69,18 @@ export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
           <h2 id="verloop-titel" className="text-lg font-semibold tracking-tight">
             {t("title")}
           </h2>
-          <p className="text-sm text-muted">{t("subtitle")}</p>
+          <p className="text-sm text-muted">{t("subtitle", { unit })}</p>
         </div>
-        <RangeToggle ranges={ranges} selected={range.key} onSelect={setSelectedKey} />
+        <Segmented
+          label={t("rangeGroup")}
+          options={ranges.map((r) => ({
+            key: r.key,
+            label: t(`ranges.${r.key}.label`),
+            srLabel: t(`ranges.${r.key}.name`),
+          }))}
+          selected={range.key}
+          onSelect={setSelectedKey}
+        />
       </div>
 
       <figure data-reveal="" className="mt-4 rounded-2xl border border-line bg-card p-4 sm:p-6" style={stagger(1)}>
@@ -113,10 +133,10 @@ export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
                 animationDuration={180}
                 wrapperStyle={{ zIndex: 20 }}
               />
-              {/* Keyed by range: a range change remounts both series, so they redraw instead of morphing. */}
+              {/* Keyed by range and unit: a change remounts both series, so they redraw instead of morphing. */}
               {plotInView && (
                 <Area
-                  key={`band-${range.key}`}
+                  key={`band-${range.key}-${unit}`}
                   dataKey="band"
                   stroke="none"
                   fill="var(--band)"
@@ -127,7 +147,7 @@ export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
               )}
               {plotInView && (
                 <Line
-                  key={`mid-${range.key}`}
+                  key={`mid-${range.key}-${unit}`}
                   dataKey="mid"
                   stroke="var(--accent)"
                   strokeWidth={2}

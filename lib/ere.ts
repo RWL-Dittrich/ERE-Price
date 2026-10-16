@@ -26,7 +26,7 @@ export type ErePrices = {
 };
 
 /** The 104 weeks of history are the most the feed returns. */
-const FEED_URL = "https://joulo.nl/api/ere-price?weeks_back=104";
+export const FEED_URL = "https://joulo.nl/api/ere-price?weeks_back=104";
 const FEED_TIMEOUT_MS = 10_000;
 
 /** A week as the feed sends it. Typed as unknown: it is outside data and gets checked before use. */

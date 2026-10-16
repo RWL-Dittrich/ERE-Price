@@ -1,16 +1,31 @@
 {
   "Meta": {
-    "title": "ERE prijs – actuele ERE-marktprijs",
+    "title": "ERE Index – actuele ERE-prijs per week",
     "description": "De actuele en historische ERE-marktprijs in Nederland: bied-, laat- en middenprijs per emissiereductie-eenheid, per week; elk uur opgehaald bij Joulo.",
-    "openGraphLocale": "nl_NL"
+    "openGraphLocale": "nl_NL",
+    "priceTitle": "ERE prijs {week}: {price} per ERE | {site}",
+    "priceDescription": "Actuele ERE-prijs: {price} per ERE, ≈ {perKwh} per kWh thuisladen (bruto). Bied, laat en prijsverloop per week, plus uitleg: wat levert je laadpaal op?",
+    "keywords": "ERE prijs, ERE prijzen, ERE-prijs, ERE prijs vandaag, ERE koers, ERE waarde, ERE per kWh, ERE laadpaal, ERE thuisladen, emissiereductie-eenheid prijs, ERE-E, HBE prijs",
+    "image": {
+      "perKwh": "≈ {perKwh} per kWh thuisladen (bruto)",
+      "source": "Bron: Joulo (joulo.nl/status), CC BY 4.0"
+    },
+    "dataset": {
+      "name": "ERE-marktprijs per week (Nederland)",
+      "description": "Wekelijkse bied-, laat- en middenprijs in euro per ERE (emissiereductie-eenheid), elke week door Joulo ingevoerd op basis van de LRE-E-spotmarkt. De middenprijs is het gemiddelde van bied en laat."
+    }
   },
   "Header": {
     "explainerLink": "Wat zijn ERE's?",
+    "explainerLinkShort": "Uitleg",
+    "calculatorLink": "Rekenhulp",
     "languageSwitch": "Taal"
   },
   "Hero": {
-    "title": "Actuele ERE-marktprijs (midden)",
+    "title": "Actuele ERE-prijs (midden)",
     "perEre": "per ERE",
+    "unitGroup": "Prijs per",
+    "units": { "ere": "ERE", "kwh": "kWh" },
     "comparedTo": "t.o.v. {week}",
     "change": {
       "up": "gestegen met",
@@ -19,11 +34,17 @@
     },
     "bid": {
       "label": "Bied",
-      "tip": "Biedprijs: wat kopers op de LRE-E-spotmarkt deze week bieden voor één ERE."
+      "tip": "Biedprijs: wat kopers op de LRE-E-spotmarkt deze week bieden voor één ERE.",
+      "tipKwh": "Biedprijs omgerekend naar één kWh: wat kopers op de LRE-E-spotmarkt deze week bieden voor één ERE, × {erePerKwh} ERE per kWh."
     },
     "offer": {
       "label": "Laat",
-      "tip": "Laatprijs (vraagprijs): wat verkopers deze week vragen voor één ERE. Het verschil met de biedprijs is de spread."
+      "tip": "Laatprijs (vraagprijs): wat verkopers deze week vragen voor één ERE. Het verschil met de biedprijs is de spread.",
+      "tipKwh": "Laatprijs (vraagprijs) omgerekend naar één kWh: wat verkopers deze week vragen voor één ERE, × {erePerKwh} ERE per kWh. Het verschil met de biedprijs is de spread."
+    },
+    "perKwh": {
+      "label": "per kWh (bruto)",
+      "tip": "Indicatief, voor thuisladen: middenprijs × {erePerKwh} ERE per kWh, vóór kosten van de inboekdienstverlener."
     },
     "updated": "Laatst bijgewerkt: {date}",
     "high": "52 weken hoog",
@@ -33,7 +54,7 @@
   },
   "Chart": {
     "title": "Prijsverloop",
-    "subtitle": "Per week, in euro per ERE",
+    "subtitle": "Per week, in euro per {unit, select, kwh {kWh} other {ERE}}",
     "rangeGroup": "Periode",
     "ranges": {
       "3m": { "label": "3M", "name": "3 maanden" },
@@ -44,7 +65,7 @@
     "legendMid": "Middenprijs",
     "legendBand": "Bied–laat",
     "noScript": "De grafiek heeft JavaScript nodig. De gegevens staan onder ‘Toon gegevens als tabel’.",
-    "summary": "Middenprijs per ERE over {range} ({count} weken met data): van {from} in {fromWeek} naar {to} in {toWeek}. Hoogste {high} ({highWeek}), laagste {low} ({lowWeek}).",
+    "summary": "Middenprijs per {unit, select, kwh {kWh thuisladen (bruto)} other {ERE}} over {range} ({count} weken met data): van {from} in {fromWeek} naar {to} in {toWeek}. Hoogste {high} ({highWeek}), laagste {low} ({lowWeek}).",
     "tooltip": {
       "monday": "maandag {date}",
       "offer": "laat",
@@ -53,8 +74,8 @@
     },
     "table": {
       "toggle": "Toon gegevens als tabel",
-      "label": "ERE-prijs per week",
-      "caption": "ERE-prijs per week in euro over {range}, nieuwste eerst",
+      "label": "{unit, select, kwh {ERE-prijs per kWh per week} other {ERE-prijs per week}}",
+      "caption": "ERE-prijs per week in euro per {unit, select, kwh {kWh thuisladen (bruto)} other {ERE}} over {range}, nieuwste eerst",
       "week": "Week",
       "bid": "Bied",
       "mid": "Midden",
@@ -142,7 +163,9 @@
     "value": {
       "title": "Wat levert het op?",
       "caption": "Van 1 kWh naar 0,3327 ERE, en wie er betaalt: brandstofleveranciers via de markt, niet de overheid.",
-      "p1": "Voor stroom uit het net die in 2026 is geleverd, <neaFormula>rekent de NEa</neaFormula>: ERE-E = kWh × 0,505 × 183 g/MJ × 3,6 MJ/kWh ÷ 1000. Dat is 0,3327 ERE per kWh.",
+      "p1": "Voor stroom uit het net die in 2026 is geleverd, <neaFormula>rekent de NEa</neaFormula>:",
+      "formula": "<part>ERE-E = kWh</part> <part>× 0,505</part> <part>× 183 g/MJ</part> <part>× 3,6 MJ/kWh</part> <part>÷ 1000</part>",
+      "formulaResult": "= 0,3327 ERE per kWh",
       "note": "0,505 is het aandeel hernieuwbare stroom in Nederland van twee jaar vóór het leverjaar, vastgesteld door het <cbs>CBS</cbs> (50,5%). Dit getal verandert dus elk jaar. 183 g/MJ is de <fossilReference>fossiele referentiewaarde</fossilReference> voor elektriciteit; voor biobrandstoffen en hernieuwbare brandstoffen is dat 94 g/MJ. De vermenigvuldigingsfactor 4 die voor HBE's gold, bestaat niet meer.",
       "card": {
         "label": "Indicatief, bruto per kWh thuisladen in 2026",

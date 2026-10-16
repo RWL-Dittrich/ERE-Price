@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import { usePopover } from "./usePopover";
 
 /**
@@ -9,18 +9,20 @@ import { usePopover } from "./usePopover";
  * open and close it in one go.
  *
  * align="end" anchors the explanation to the chip's right edge, for a chip too far right to fit a 14rem box on a
- * phone.
+ * phone. bare drops the chip's outline, for a tip on a word in a line of text.
  */
 export default function TipChip({
   label,
   value,
   tip,
   align = "start",
+  bare = false,
 }: {
   label: string;
-  value: string;
-  tip: string;
+  value?: ReactNode;
+  tip: ReactNode;
   align?: "start" | "end";
+  bare?: boolean;
 }) {
   const tooltipId = useId();
   const { open, setOpen, props: popoverProps } = usePopover();
@@ -31,10 +33,23 @@ export default function TipChip({
         type="button"
         aria-describedby={tooltipId}
         onClick={() => setOpen(true)}
-        className="cursor-help rounded-full border border-line bg-card px-3 py-1 transition-colors hover:border-accent focus-visible:border-accent"
+        className={
+          bare
+            ? "group rounded-sm"
+            : "rounded-full border border-line bg-card px-3 py-1 transition-colors hover:border-accent focus-visible:border-accent"
+        }
       >
-        <span className="text-muted underline decoration-dotted underline-offset-4">{label}</span>{" "}
-        <span className="font-medium">{value}</span>
+        <span
+          className={`text-muted underline decoration-dotted underline-offset-4 ${bare ? "transition-colors group-hover:decoration-accent group-focus-visible:decoration-accent" : ""}`}
+        >
+          {label}
+        </span>
+        {value && (
+          <>
+            {" "}
+            <span className="font-medium">{value}</span>
+          </>
+        )}
       </button>
       {/* pt-2 instead of a margin: no gap, so the pointer can cross from the chip onto the text without leaving it. */}
       <span

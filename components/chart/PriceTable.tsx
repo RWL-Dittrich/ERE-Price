@@ -4,11 +4,13 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { EreWeek } from "@/lib/ere";
 import { weekLabel } from "@/lib/week";
 import { stagger } from "../motion/stagger";
+import { useUnit } from "../unit";
 
 /** The chart's data as a table, behind a disclosure: the accessible alternative to the (aria-hidden) chart. */
 export default function PriceTable({ weeks, rangeName }: { weeks: EreWeek[]; rangeName: string }) {
   const t = useTranslations("Chart.table");
   const format = useFormatter();
+  const { unit } = useUnit();
   const newestFirst = [...weeks].reverse();
 
   return (
@@ -21,11 +23,11 @@ export default function PriceTable({ weeks, rangeName }: { weeks: EreWeek[]; ran
         <div
           tabIndex={0}
           role="region"
-          aria-label={t("label")}
+          aria-label={t("label", { unit })}
           className="max-h-96 overflow-auto rounded-xl border border-line bg-card sm:max-w-xl"
         >
           <table className="w-full text-right tabular-nums">
-            <caption className="sr-only">{t("caption", { range: rangeName })}</caption>
+            <caption className="sr-only">{t("caption", { unit, range: rangeName })}</caption>
             <thead className="sticky top-0 bg-card text-xs text-muted">
               <tr>
                 <th scope="col" className="px-2 py-2 text-left font-medium sm:px-3">{t("week")}</th>

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-"ERE prijs" is a single-page Next.js 16 site showing the current and historic weekly Dutch ERE (emissiereductie-eenheid) market price, with an illustrated, fact-checked explainer about EREs. It will be hosted at https://ere.robindittrich.nl and self-hosted with `next start`. The site is bilingual (Dutch at `/nl`, English at `/en`) with next-intl. Code and comments are English.
+"ERE Index" is a single-page Next.js 16 site showing the current and historic weekly Dutch ERE (emissiereductie-eenheid) market price, with an illustrated, fact-checked explainer about EREs. It will be hosted at https://ere-index.nl and self-hosted with `next start`. The site is bilingual (Dutch at `/nl`, English at `/en`) with next-intl. Code and comments are English.
 
 Never run `git commit` or `git push` in this repo: the owner commits.
 
@@ -41,13 +41,30 @@ lib/ere.ts         the price feed: getErePrices(), summarize()
 lib/week.ts        weekLabel(), isoWeekMonday() (client-safe)
 lib/earnings.ts    ERE_PER_KWH, EXAMPLE_FEE
 lib/chart-axes.ts  y-axis and month ticks for the chart
-components/        SiteHeader, Hero, SiteFooter, Explainer, Term, TipChip, LangSwitch, usePopover
-  chart/           PriceChart (client) with RangeToggle, PriceTooltip, PriceTable, ranges.ts
+lib/site.ts        SITE_NAME ("ERE Index") and SITE_URL (https://ere-index.nl)
+app/               robots.ts, sitemap.ts; [locale]/opengraph-image.tsx (the share image)
+components/        SiteHeader, Hero, SiteFooter, Explainer, Term, TipChip, LangSwitch, usePopover, Segmented, unit.tsx
+  chart/           PriceChart (client) with PriceTooltip, PriceTable, ranges.ts
   illustrations/   the explainer's SVG plates and the EarningsCalculator
   motion/          MotionRoot, stagger(), useInView()
 ```
 
-`app/[locale]/page.tsx` fetches the prices once and renders `SiteHeader`, `Hero`, `PriceChart`, `Explainer` and, last, `MotionRoot`. The header is in the page rather than the layout because its link targets `#uitleg`, which only exists on the page.
+`app/[locale]/page.tsx` fetches the prices once and renders `SiteHeader`, `Hero`, `PriceChart`, `Explainer` and, last, `MotionRoot`. The header is in the page rather than the layout because its links target `#uitleg` and `#rekenhulp`, which only exist on the page. Below 640px its links shrink to "Uitleg" and a calculator icon, so the row fits at 360px; check that width in both languages after changing the header.
+
+## SEO
+
+- `page.tsx`'s `generateMetadata` puts this week's price in the title and description (`Meta.priceTitle`, `Meta.priceDescription`), so they refresh with the page cache. The layout holds the fallbacks, `keywords`, the canonical and hreflang links, and the Twitter card type.
+- `components/StructuredData.tsx` renders the JSON-LD: `WebSite`, a `Dataset` for the weekly prices (Joulo, CC BY 4.0) and an `FAQPage` built from `FAQ_IDS` in `Explainer.tsx`. Check changes with Google's Rich Results Test.
+- `app/[locale]/opengraph-image.tsx` draws the share image with this week's price. It is prerendered per locale. Its alt is one fixed text for both languages, because `generateImageMetadata` runs before the locale is known.
+- The middleware matcher in `proxy.ts` skips `opengraph-image`: Next links the English image as `/en-GB/opengraph-image`, and the middleware would redirect that to a broken URL.
+- `npm run build` must also list `/nl/opengraph-image` and `/en-GB/opengraph-image` as `●` with `1h`/`1w`, and `/robots.txt` and `/sitemap.xml` as static.
+
+## Units: ERE / kWh (`components/unit.tsx`)
+
+- The hero's `UnitToggle` switches every price in the hero and the chart between per ERE and per kWh (× `ERE_PER_KWH`). `UnitProvider` in `page.tsx` holds the setting. It starts at ERE on every visit, so the static page matches; the explainer always shows both.
+- `Hero` stays a server component: it formats both versions of each price and `ByUnit` picks one in the browser. A per-unit element that carries `data-countup` is keyed by unit, so a running count-up can't overwrite the other unit's value.
+- `PriceChart` converts the weeks once, at the top. The axis, tooltip, summary and `PriceTable` follow from that. Its texts take the unit as an ICU `{unit, select, kwh {…} other {…}}`.
+- `Segmented` is the shared pill-button group, used for the unit switch and the chart's ranges.
 
 ## Languages (next-intl)
 
@@ -119,7 +136,7 @@ components/        SiteHeader, Hero, SiteFooter, Explainer, Term, TipChip, LangS
   - The one exception is the hero intro (`.hero-in`). It is gated on `html[data-js]`, which the inline script in the layout sets, and it finishes on its own.
 - Animate only `opacity`, the individual `translate`/`scale`/`rotate` properties and `stroke-dashoffset`, never `transform`. An element gets at most one animation role.
 - Hover effects use `@media (hover: hover)` and have a matching `:focus-visible` style.
-- Each `.hero-in` row is its own stacking context, so a popup inside one (like the `TipChip` tooltips) needs `relative z-10` on the row itself.
+- Each `.hero-in` row is its own stacking context, so a popup inside one (like the `TipChip` tooltips) needs `relative z-10` on the row itself. A row whose popup drops over another popup row needs the higher z: the price row (per-kWh tip) is `z-20`, above the Bid/Offer row's `z-10`.
 - `stagger(index)` sets `--i`, the stagger index, registered with `@property` as non-inheriting.
 
 ## Styling
@@ -134,7 +151,7 @@ components/        SiteHeader, Hero, SiteFooter, Explainer, Term, TipChip, LangS
 
 ## Constraints
 
-- External links open in a new tab (`target="_blank" rel="noopener"`) and carry an sr-only `Links.newTab` note. Use `Term` in the explainer or `ExternalLink` in `SiteFooter`, or copy the pattern. In-page anchors (`#uitleg`, `#bronnen`; the ids are the same in both languages) stay in the same tab.
+- External links open in a new tab (`target="_blank" rel="noopener"`) and carry an sr-only `Links.newTab` note. Use `Term` in the explainer or `ExternalLink` in `SiteFooter`, or copy the pattern. In-page anchors (`#uitleg`, `#rekenhulp`, `#bronnen`; the ids are the same in both languages) stay in the same tab.
 - **Attribution is required** (Joulo data is CC BY 4.0). Keep the citation with its links in the footer: "Bron: Joulo, ERE-marktprijs per week (joulo.nl/status), CC BY 4.0" on /nl and "Source: Joulo, ERE market price per week (joulo.nl/status), CC BY 4.0" on /en.
 - Prices are € per ERE, not per kWh. Bid and offer come from the LRE-E spot market; mid = (bid + offer) / 2.
 - Before using a Next.js API, check `node_modules/next/dist/docs/` (see AGENTS.md). For example, `error.tsx` receives `retry` (stable since 16.3).

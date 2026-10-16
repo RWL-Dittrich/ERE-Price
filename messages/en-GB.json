@@ -1,16 +1,31 @@
 {
   "Meta": {
-    "title": "ERE prijs – current Dutch ERE market price",
+    "title": "ERE Index – current Dutch ERE price per week",
     "description": "The current and historic ERE market price in the Netherlands: bid, offer and mid price per emission reduction unit, per week; fetched hourly from Joulo.",
-    "openGraphLocale": "en_GB"
+    "openGraphLocale": "en_GB",
+    "priceTitle": "ERE price {week}: {price} per ERE | {site}",
+    "priceDescription": "Current Dutch ERE price: {price} per ERE, ≈ {perKwh} per kWh charged at home (gross). Bid, offer and weekly price history, plus a guide: what does your charge point earn?",
+    "keywords": "ERE price, ERE prices, ERE price today, ERE price Netherlands, emission reduction unit price, ERE per kWh, ERE charge point, ERE home charging, ERE-E, HBE price",
+    "image": {
+      "perKwh": "≈ {perKwh} per kWh charged at home (gross)",
+      "source": "Source: Joulo (joulo.nl/status), CC BY 4.0"
+    },
+    "dataset": {
+      "name": "ERE market price per week (Netherlands)",
+      "description": "Weekly bid, offer and mid price in euros per ERE (emission reduction unit), entered by Joulo every week based on the LRE-E spot market. The mid price is the average of bid and offer."
+    }
   },
   "Header": {
     "explainerLink": "What are EREs?",
+    "explainerLinkShort": "Guide",
+    "calculatorLink": "Calculator",
     "languageSwitch": "Language"
   },
   "Hero": {
-    "title": "Current ERE market price (mid)",
+    "title": "Current ERE price (mid)",
     "perEre": "per ERE",
+    "unitGroup": "Price per",
+    "units": { "ere": "ERE", "kwh": "kWh" },
     "comparedTo": "vs. {week}",
     "change": {
       "up": "up by",
@@ -19,11 +34,17 @@
     },
     "bid": {
       "label": "Bid",
-      "tip": "Bid price: what buyers on the LRE-E spot market are bidding for one ERE this week."
+      "tip": "Bid price: what buyers on the LRE-E spot market are bidding for one ERE this week.",
+      "tipKwh": "Bid price converted to one kWh: what buyers on the LRE-E spot market are bidding for one ERE this week, × {erePerKwh} ERE per kWh."
     },
     "offer": {
       "label": "Offer",
-      "tip": "Offer price (ask): what sellers are asking for one ERE this week. The gap with the bid price is the spread."
+      "tip": "Offer price (ask): what sellers are asking for one ERE this week. The gap with the bid price is the spread.",
+      "tipKwh": "Offer price (ask) converted to one kWh: what sellers are asking for one ERE this week, × {erePerKwh} ERE per kWh. The gap with the bid price is the spread."
+    },
+    "perKwh": {
+      "label": "per kWh (gross)",
+      "tip": "Indicative, for charging at home: mid price × {erePerKwh} ERE per kWh, before the registration service provider's fees."
     },
     "updated": "Last updated: {date}",
     "high": "52-week high",
@@ -33,7 +54,7 @@
   },
   "Chart": {
     "title": "Price history",
-    "subtitle": "Weekly, in euros per ERE",
+    "subtitle": "Weekly, in euros per {unit, select, kwh {kWh} other {ERE}}",
     "rangeGroup": "Period",
     "ranges": {
       "3m": { "label": "3M", "name": "3 months" },
@@ -44,7 +65,7 @@
     "legendMid": "Mid price",
     "legendBand": "Bid–offer",
     "noScript": "The chart needs JavaScript. The data is under ‘Show data as a table’.",
-    "summary": "Mid price per ERE over {range} ({count} weeks with data): from {from} in {fromWeek} to {to} in {toWeek}. Highest {high} ({highWeek}), lowest {low} ({lowWeek}).",
+    "summary": "Mid price per {unit, select, kwh {kWh charged at home (gross)} other {ERE}} over {range} ({count} weeks with data): from {from} in {fromWeek} to {to} in {toWeek}. Highest {high} ({highWeek}), lowest {low} ({lowWeek}).",
     "tooltip": {
       "monday": "Monday {date}",
       "offer": "offer",
@@ -53,8 +74,8 @@
     },
     "table": {
       "toggle": "Show data as a table",
-      "label": "ERE price per week",
-      "caption": "ERE price per week in euros over {range}, newest first",
+      "label": "{unit, select, kwh {ERE price per kWh per week} other {ERE price per week}}",
+      "caption": "ERE price per week in euros per {unit, select, kwh {kWh charged at home (gross)} other {ERE}} over {range}, newest first",
       "week": "Week",
       "bid": "Bid",
       "mid": "Mid",
@@ -142,7 +163,9 @@
     "value": {
       "title": "What does it earn you?",
       "caption": "From 1 kWh to 0.3327 ERE, and who pays: fuel suppliers through the market, not the government.",
-      "p1": "For grid electricity delivered in 2026, <neaFormula>the NEa calculates</neaFormula>: ERE-E = kWh × 0.505 × 183 g/MJ × 3.6 MJ/kWh ÷ 1000. That is 0.3327 ERE per kWh.",
+      "p1": "For grid electricity delivered in 2026, <neaFormula>the NEa calculates</neaFormula>:",
+      "formula": "<part>ERE-E = kWh</part> <part>× 0.505</part> <part>× 183 g/MJ</part> <part>× 3.6 MJ/kWh</part> <part>÷ 1000</part>",
+      "formulaResult": "= 0.3327 ERE per kWh",
       "note": "0.505 is the share of renewable electricity in the Netherlands two years before the delivery year, as determined by <cbs>CBS</cbs> (50.5%). So this number changes every year. 183 g/MJ is the <fossilReference>fossil reference value</fossilReference> for electricity; for biofuels and renewable fuels it is 94 g/MJ. The multiplication factor of 4 that applied to HBEs no longer exists.",
       "card": {
         "label": "Indicative, gross per kWh charged at home in 2026",

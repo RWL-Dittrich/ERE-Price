@@ -108,6 +108,12 @@ a:focus-visible {
   text-decoration-color: var(--accent);
   text-underline-offset: 4px;
 }
+/* Tailwind v4 leaves buttons at the default arrow; everything clickable gets the hand, like links. */
+@layer base {
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
 /* Hover only where it can end: on touch, :hover sticks after a tap. */
 @media (hover: hover) and (pointer: fine) {
   a:hover {
@@ -299,8 +305,8 @@ a:focus-visible {
     }
   }
 
-  /* Range toggle: the pill slides under the pressed button; SSR places it without JS. */
-  .range-pill {
+  /* Segmented buttons (Segmented.tsx): the pill slides under the pressed button; SSR places it without JS. */
+  .segment-pill {
     position: absolute;
     inset-block: 0.25rem;
     inset-inline-start: 0.25rem;
@@ -311,11 +317,11 @@ a:focus-visible {
     translate: calc(var(--seg-i) * 100%) 0;
   }
   @media (prefers-reduced-motion: no-preference) {
-    .range-pill {
+    .segment-pill {
       transition: translate var(--m-dur-3) var(--m-ease-spring);
     }
     /* recharts draws the line and band in but shows the dots at once; they fade in as the 900ms draw ends.
-       The series are keyed by range, so a range change remounts the dots and restarts this. */
+       The series are keyed by range and unit, so a change remounts the dots and restarts this. */
     .recharts-line-dots {
       animation: m-fade-in 300ms var(--m-ease-out) 800ms both;
     }
