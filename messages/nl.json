@@ -1,11 +1,12 @@
 {
   "Meta": {
-    "title": "ERE Index – actuele ERE-prijs per week",
-    "description": "De actuele en historische ERE-marktprijs in Nederland: bied-, laat- en middenprijs per emissiereductie-eenheid, per week; elk uur opgehaald bij Joulo.",
+    "title": "ERE Index – actuele ERE-prijs en ERE-koers per week",
+    "description": "Wat kost een ERE? De actuele en historische ERE-prijs (ERE-koers) in Nederland: bied, laat en midden per emissiereductie-eenheid, per week; elk uur opgehaald bij Joulo.",
     "openGraphLocale": "nl_NL",
-    "priceTitle": "ERE prijs {week}: {price} per ERE | {site}",
-    "priceDescription": "Actuele ERE-prijs: {price} per ERE, ≈ {perKwh} per kWh thuisladen (bruto). Bied, laat en prijsverloop per week, plus uitleg: wat levert je laadpaal op?",
-    "keywords": "ERE prijs, ERE prijzen, ERE-prijs, ERE prijs vandaag, ERE koers, ERE waarde, ERE per kWh, ERE laadpaal, ERE thuisladen, emissiereductie-eenheid prijs, ERE-E, HBE prijs",
+    "alternateNames": "ERE-index, ERE prijs, ERE koers, ERE kosten, ERE-prijs, ERE-koers",
+    "priceTitle": "ERE prijs {week}: {price} per ERE | Actuele ERE-koers – {site}",
+    "priceDescription": "Wat kost een ERE deze week? {price} per ERE, ≈ {perKwh} per kWh thuisladen. Bekijk bied, laat en het verloop van de ERE-koers, en wat je laadpaal oplevert.",
+    "keywords": "ERE prijs, ERE prijzen, ERE-prijs, ERE prijs vandaag, ERE prijs deze week, ERE koers, ERE-koers, ERE koers vandaag, ERE index, ERE waarde, ERE kosten, wat kost een ERE,ERE prijs grafiek, ERE prijs per week, ERE per kWh, ERE laadpaal, ERE thuisladen, emissiereductie-eenheid prijs, ERE-E, HBE prijs",
     "image": {
       "perKwh": "≈ {perKwh} per kWh thuisladen (bruto)",
       "source": "Bron: Joulo (joulo.nl/status), CC BY 4.0"
@@ -53,7 +54,7 @@
     "spreadNote": "laat – bied"
   },
   "Chart": {
-    "title": "Prijsverloop",
+    "title": "Verloop van de ERE-koers",
     "subtitle": "Per week, in euro per {unit, select, kwh {kWh} other {ERE}}",
     "rangeGroup": "Periode",
     "ranges": {
@@ -132,7 +133,7 @@
   },
   "Explainer": {
     "title": "Wat zijn ERE's?",
-    "intro": "Uitleg over emissiereductie-eenheden voor wie thuis een elektrische auto laadt, en voor iedereen die wil weten waar de prijs hierboven over gaat. Wijs een onderstreept begrip aan voor een korte uitleg en een link naar de bron; alle bronnen staan <sources>onderaan</sources>.",
+    "intro": "Uitleg over emissiereductie-eenheden voor wie thuis een elektrische auto laadt, en voor iedereen die wil weten waar de ERE-koers hierboven over gaat. Wijs een onderstreept begrip aan voor een korte uitleg en een link naar de bron; alle bronnen staan <sources>onderaan</sources>.",
     "what": {
       "title": "Wat is een ERE?",
       "caption": "1 ERE = 1 kg CO₂-eq reductie ten opzichte van de fossiele referentie. Bij de overgang werd 1 HBE 46 ERE.",
@@ -183,6 +184,18 @@
     },
     "faq": {
       "title": "Veelgestelde vragen",
+      "today": {
+        "question": "Wat is de ERE-prijs vandaag?",
+        "answer": "De actuele ERE-prijs is {price} per ERE (middenprijs, {week}). Dat is het gemiddelde van de bied- en laatprijs op de LRE-E-spotmarkt, zoals Joulo die wekelijks invoert. Bovenaan deze pagina staan de biedprijs, de laatprijs en de omrekening naar een kWh thuisladen."
+      },
+      "rate": {
+        "question": "Is de ERE-koers hetzelfde als de ERE-prijs?",
+        "answer": "Ja. ERE-koers, ERE-prijs, ERE-waarde en ERE-kosten zijn namen voor hetzelfde: wat één ERE op de markt kost. Er is geen beurs met een officiële koers; ERE's worden <overTheCounter>onderhands (OTC)</overTheCounter> verhandeld. De ERE Index toont daarom de wekelijkse middenprijs uit de <priceFeed>ERE-prijsfeed van Joulo</priceFeed>, in euro per ERE."
+      },
+      "updates": {
+        "question": "Hoe vaak wordt de ERE-prijs bijgewerkt?",
+        "answer": "Joulo voert elke week een nieuwe bied- en laatprijs in; niet elke week heeft een notering. Deze site haalt de feed elk uur op, dus een nieuwe weekprijs staat hier binnen een uur."
+      },
       "self": {
         "question": "Kan ik zelf ERE's inboeken?",
         "answer": "Nee. <noSelfRegistration>Particulieren mogen niet zelf inboeken</noSelfRegistration>. Een zelfstandige inboeker heeft een KvK-inschrijving nodig en moet <minimumVolume>minimaal 2 miljoen kWh</minimumVolume> per jaar inboeken. Als particulier heb je dus een inboekdienstverlener nodig."

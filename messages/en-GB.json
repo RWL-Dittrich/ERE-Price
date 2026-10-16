@@ -1,11 +1,12 @@
 {
   "Meta": {
-    "title": "ERE Index – current Dutch ERE price per week",
-    "description": "The current and historic ERE market price in the Netherlands: bid, offer and mid price per emission reduction unit, per week; fetched hourly from Joulo.",
+    "title": "ERE Index – current Dutch ERE price and rate per week",
+    "description": "What does an ERE cost? The current and historic ERE price (ERE rate) in the Netherlands: bid, offer and mid per emission reduction unit, per week; fetched hourly from Joulo.",
     "openGraphLocale": "en_GB",
-    "priceTitle": "ERE price {week}: {price} per ERE | {site}",
-    "priceDescription": "Current Dutch ERE price: {price} per ERE, ≈ {perKwh} per kWh charged at home (gross). Bid, offer and weekly price history, plus a guide: what does your charge point earn?",
-    "keywords": "ERE price, ERE prices, ERE price today, ERE price Netherlands, emission reduction unit price, ERE per kWh, ERE charge point, ERE home charging, ERE-E, HBE price",
+    "alternateNames": "ERE-index, ERE price, ERE rate, ERE cost, Dutch ERE price",
+    "priceTitle": "ERE price {week}: {price} per ERE | Current Dutch ERE rate – {site}",
+    "priceDescription": "What does an ERE cost this week? {price} per ERE, ≈ {perKwh} per kWh charged at home. See bid, offer, the weekly ERE price history and what your charge point earns.",
+    "keywords": "ERE price, ERE prices, ERE price today, ERE price this week, ERE rate, ERE index, ERE value, ERE cost, ERE price Netherlands,what does an ERE cost, ERE price chart, ERE price per week, emission reduction unit price, ERE per kWh, ERE charge point, ERE home charging, ERE-E, HBE price",
     "image": {
       "perKwh": "≈ {perKwh} per kWh charged at home (gross)",
       "source": "Source: Joulo (joulo.nl/status), CC BY 4.0"
@@ -53,7 +54,7 @@
     "spreadNote": "offer – bid"
   },
   "Chart": {
-    "title": "Price history",
+    "title": "ERE price history",
     "subtitle": "Weekly, in euros per {unit, select, kwh {kWh} other {ERE}}",
     "rangeGroup": "Period",
     "ranges": {
@@ -132,7 +133,7 @@
   },
   "Explainer": {
     "title": "What are EREs?",
-    "intro": "An explanation of emission reduction units for anyone who charges an electric car at home, and for anyone who wants to know what the price above is about. Point at an underlined term for a short explanation and a link to its source; all sources are listed <sources>at the bottom</sources>.",
+    "intro": "An explanation of emission reduction units for anyone who charges an electric car at home, and for anyone who wants to know what the ERE price above is about. Point at an underlined term for a short explanation and a link to its source; all sources are listed <sources>at the bottom</sources>.",
     "what": {
       "title": "What is an ERE?",
       "caption": "1 ERE = 1 kg CO₂-eq reduction compared with the fossil reference. At the transition, 1 HBE became 46 EREs.",
@@ -183,6 +184,18 @@
     },
     "faq": {
       "title": "Frequently asked questions",
+      "today": {
+        "question": "What is the ERE price today?",
+        "answer": "The current ERE price is {price} per ERE (mid price, {week}). That is the average of the bid and offer price on the LRE-E spot market, as Joulo enters it every week. The top of this page shows the bid price, the offer price and the conversion to one kWh charged at home."
+      },
+      "rate": {
+        "question": "Is the ERE rate the same as the ERE price?",
+        "answer": "Yes. ERE rate, ERE price, ERE value and ERE cost are names for the same thing: what one ERE costs on the market. There is no exchange with an official rate; EREs are traded <overTheCounter>over the counter (OTC)</overTheCounter>. The ERE Index therefore shows the weekly mid price from <priceFeed>Joulo's ERE price feed</priceFeed>, in euros per ERE."
+      },
+      "updates": {
+        "question": "How often is the ERE price updated?",
+        "answer": "Joulo enters a new bid and offer price every week; not every week has a quote. This site fetches the feed every hour, so a new weekly price appears here within an hour."
+      },
       "self": {
         "question": "Can I register EREs myself?",
         "answer": "No. <noSelfRegistration>Private individuals may not register themselves</noSelfRegistration>. An independent registrant needs a KvK (Dutch Chamber of Commerce) registration and must register <minimumVolume>at least 2 million kWh</minimumVolume> a year. So as a private individual you need a registration service provider."

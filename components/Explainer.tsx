@@ -3,6 +3,8 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { sources, termLink, termLinks, type SourceId, type TermId } from "@/i18n/links";
 import { languageOf } from "@/i18n/routing";
 import { ERE_PER_KWH, EXAMPLE_FEE } from "@/lib/earnings";
+import type { EreWeek } from "@/lib/ere";
+import { weekLabel } from "@/lib/week";
 import ChargingPath from "./illustrations/ChargingPath";
 import EarningsCalculator from "./illustrations/EarningsCalculator";
 import EreUnit from "./illustrations/EreUnit";
@@ -20,7 +22,7 @@ const CONDITIONS = ["meter", "loose", "grid", "kwh", "provider"] as const;
 const linkClass = "underline underline-offset-2 hover:text-fg focus-visible:text-fg";
 
 /** The FAQ questions, in order, under Explainer.faq.<id>. StructuredData lists the same ones as an FAQPage. */
-export const FAQ_IDS = ["self", "public", "provider", "when", "law"] as const;
+export const FAQ_IDS = ["today", "rate", "updates", "self", "public", "provider", "when", "law"] as const;
 
 /**
  * "Wat zijn ERE's?": five illustrated parts, the FAQ and the sources. The text is in messages/<locale>.json under
@@ -29,7 +31,8 @@ export const FAQ_IDS = ["self", "public", "provider", "when", "law"] as const;
  * Terms in the text are tags around their words, e.g. "<ereUnit>ERE (emissiereductie-eenheid)</ereUnit>". Each tag
  * becomes a <Term>: its link comes from i18n/links.ts, its one-line explanation from Terms.<id>.
  */
-export default async function Explainer({ midPrice }: { midPrice: number }) {
+export default async function Explainer({ current }: { current: EreWeek }) {
+  const midPrice = current.mid;
   const t = await getTranslations("Explainer");
   const tTerms = await getTranslations("Terms");
   const tSources = await getTranslations("Sources");
@@ -47,10 +50,12 @@ export default async function Explainer({ midPrice }: { midPrice: number }) {
       ),
     ]),
   );
-  const text = (key: Parameters<typeof t.rich>[0]) => t.rich(key, termTags);
+  const text = (key: Parameters<typeof t.rich>[0], values?: Record<string, string>) => t.rich(key, { ...termTags, ...values });
   const paragraphs = (...keys: Parameters<typeof t.rich>[0][]) => keys.map((key) => <p key={key}>{text(key)}</p>);
 
   const grossPerKwh = midPrice * ERE_PER_KWH;
+  // The FAQ "What is the ERE price today?" carries the live price; StructuredData fills in the same values.
+  const faqValues = { price: format.number(midPrice, "price"), week: weekLabel(current) };
 
   return (
     <section id="uitleg" aria-labelledby="uitleg-titel" className="mt-16">
@@ -133,7 +138,7 @@ export default async function Explainer({ midPrice }: { midPrice: number }) {
             className="mt-3 divide-y divide-line rounded-xl border border-line bg-card"
           >
             {FAQ_IDS.map((id) => (
-              <Faq key={id} question={t(`faq.${id}.question`)} answer={text(`faq.${id}.answer`)}>
+              <Faq key={id} question={t(`faq.${id}.question`)} answer={text(`faq.${id}.answer`, faqValues)}>
                 {id === "when" && <YearTimeline />}
               </Faq>
             ))}

@@ -57,7 +57,7 @@ export default async function HomePage() {
           <Hero prices={prices} />
           <PriceChart weeks={prices.weeks} />
         </UnitProvider>
-        <Explainer midPrice={prices.current.mid} />
+        <Explainer current={prices.current} />
       </main>
 
       {/* After the content, not in the layout: the page can hydrate after the layout, and MotionRoot writes into this
