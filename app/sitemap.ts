@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/site";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { updatedAt } = await getErePrices();
   const lastModified = Number.isNaN(Date.parse(updatedAt)) ? undefined : updatedAt;
-  const languages = { nl: `${SITE_URL}/nl`, en: `${SITE_URL}/en`, "x-default": SITE_URL };
+  const languages = { nl: `${SITE_URL}/nl`, en: `${SITE_URL}/en`, "x-default": `${SITE_URL}/en` };
 
   return [`${SITE_URL}/nl`, `${SITE_URL}/en`].map((url) => ({
     url,

@@ -85,12 +85,13 @@ export default function PriceChart({ weeks }: { weeks: EreWeek[] }) {
 
       <figure data-reveal="" className="mt-4 rounded-2xl border border-line bg-card p-4 sm:p-6" style={stagger(1)}>
         <div aria-hidden className="mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+          {/* Swatches sit on the text's cap height (9px at 12px Geist): a 12px block hung 2px under the baseline. */}
           <span className="flex items-center gap-2">
-            <span className="h-0.5 w-4 rounded-full bg-accent" />
+            <span className="h-0.5 w-4 shrink-0 rounded-full bg-accent" />
             {t("legendMid")}
           </span>
           <span className="flex items-center gap-2">
-            <span className="h-3 w-4 rounded-sm bg-band" />
+            <span className="h-2.5 w-4 shrink-0 rounded-xs bg-band" />
             {t("legendBand")}
           </span>
         </div>

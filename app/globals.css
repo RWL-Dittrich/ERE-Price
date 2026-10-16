@@ -257,30 +257,37 @@ a:focus-visible {
 
   /* Hero: static glow over a masked hairline grid. */
   .hero::before {
+    --hero-overhang: 6rem;
     content: "";
     position: absolute;
     z-index: -1;
     pointer-events: none;
-    inset: -8rem -6rem auto;
+    inset: -8rem calc(-1 * var(--hero-overhang)) auto;
     height: 32rem;
+    /* The grid's origin is the hero's top-left content corner, so a vertical line runs along the text's left edge and
+       the 40px cells meet the hero's pt-10 (40px). The glow and the mask centre on the big price: 8rem from the
+       hero's left edge (6rem overhang + 8rem) and 11rem below its top (8rem overhang + 11rem), measured on desktop;
+       on a phone the price sits about 1.5rem higher, well within the glow. */
     background:
-      radial-gradient(38rem 18rem at 25% 45%, var(--glow), transparent 70%),
-      linear-gradient(color-mix(in oklab, var(--grid) 70%, transparent) 1px, transparent 1px) 0 0 / 40px 40px,
-      linear-gradient(90deg, color-mix(in oklab, var(--grid) 70%, transparent) 1px, transparent 1px) 0 0 / 40px 40px;
+      radial-gradient(38rem 18rem at 14rem 19rem, var(--glow), transparent 70%),
+      linear-gradient(color-mix(in oklab, var(--grid) 70%, transparent) 1px, transparent 1px) var(--hero-overhang) 8rem /
+        40px 40px,
+      linear-gradient(90deg, color-mix(in oklab, var(--grid) 70%, transparent) 1px, transparent 1px) var(--hero-overhang)
+        8rem / 40px 40px;
     /* The linear layer fades the left overhang, which the ellipse alone leaves at ~70% (a hard edge on wide screens). */
     -webkit-mask:
-      radial-gradient(ellipse 70% 65% at 30% 40%, #000 30%, transparent 75%),
+      radial-gradient(ellipse 70% 65% at 30% 19rem, #000 30%, transparent 75%),
       linear-gradient(to right, transparent, #000 6rem);
     -webkit-mask-composite: source-in;
     mask:
-      radial-gradient(ellipse 70% 65% at 30% 40%, #000 30%, transparent 75%),
+      radial-gradient(ellipse 70% 65% at 30% 19rem, #000 30%, transparent 75%),
       linear-gradient(to right, transparent, #000 6rem);
     mask-composite: intersect;
   }
   /* Without overflow: clip (Safari < 16) the overhang would make phones pan sideways; keep the glow in the column. */
   @supports not (overflow: clip) {
     .hero::before {
-      inset-inline: 0;
+      --hero-overhang: 0px;
     }
   }
   /* CSS-only intro; data-js comes from the inline script in layout.tsx and the animation always completes. */

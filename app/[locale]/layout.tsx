@@ -31,7 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t("description"),
     // Google ignores keywords; Bing gives them a little weight.
     keywords: t("keywords").split(", "),
-    alternates: { canonical: path, languages: { nl: "/nl", en: "/en", "x-default": "/" } },
+    // x-default points at a real page (English, the default locale), not at "/", which only redirects.
+    alternates: { canonical: path, languages: { nl: "/nl", en: "/en", "x-default": "/en" } },
     // X falls back to the og: title, description and image.
     twitter: { card: "summary_large_image" },
   };

@@ -23,7 +23,7 @@
     "languageSwitch": "Taal"
   },
   "Hero": {
-    "title": "Actuele ERE-prijs (midden)",
+    "title": "Actuele ERE-koers (middenprijs)",
     "perEre": "per ERE",
     "unitGroup": "Prijs per",
     "units": { "ere": "ERE", "kwh": "kWh" },

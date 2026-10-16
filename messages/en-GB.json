@@ -23,7 +23,7 @@
     "languageSwitch": "Language"
   },
   "Hero": {
-    "title": "Current ERE price (mid)",
+    "title": "Current ERE rate (mid price)",
     "perEre": "per ERE",
     "unitGroup": "Price per",
     "units": { "ere": "ERE", "kwh": "kWh" },
