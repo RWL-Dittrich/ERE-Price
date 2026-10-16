@@ -4,7 +4,7 @@
     "description": "What does an ERE cost? The current and historic ERE price (ERE rate) in the Netherlands: bid, offer and mid per emission reduction unit, per week; fetched hourly from Joulo.",
     "openGraphLocale": "en_GB",
     "alternateNames": "ERE-index, ERE price, ERE rate, ERE cost, Dutch ERE price",
-    "priceTitle": "ERE price {week}: {price} per ERE | Current Dutch ERE rate – {site}",
+    "priceTitle": "ERE price & rate {week}: {price} per ERE | {site}",
     "priceDescription": "What does an ERE cost this week? {price} per ERE, ≈ {perKwh} per kWh charged at home. See bid, offer, the weekly ERE price history and what your charge point earns.",
     "keywords": "ERE price, ERE prices, ERE price today, ERE price this week, ERE rate, ERE index, ERE value, ERE cost, ERE price Netherlands,what does an ERE cost, ERE price chart, ERE price per week, emission reduction unit price, ERE per kWh, ERE charge point, ERE home charging, ERE-E, HBE price",
     "image": {

@@ -4,7 +4,7 @@
     "description": "Wat kost een ERE? De actuele en historische ERE-prijs (ERE-koers) in Nederland: bied, laat en midden per emissiereductie-eenheid, per week; elk uur opgehaald bij Joulo.",
     "openGraphLocale": "nl_NL",
     "alternateNames": "ERE-index, ERE prijs, ERE koers, ERE kosten, ERE-prijs, ERE-koers",
-    "priceTitle": "ERE prijs {week}: {price} per ERE | Actuele ERE-koers – {site}",
+    "priceTitle": "ERE prijs & koers {week}: {price} per ERE | {site}",
     "priceDescription": "Wat kost een ERE deze week? {price} per ERE, ≈ {perKwh} per kWh thuisladen. Bekijk bied, laat en het verloop van de ERE-koers, en wat je laadpaal oplevert.",
     "keywords": "ERE prijs, ERE prijzen, ERE-prijs, ERE prijs vandaag, ERE prijs deze week, ERE koers, ERE-koers, ERE koers vandaag, ERE index, ERE waarde, ERE kosten, wat kost een ERE,ERE prijs grafiek, ERE prijs per week, ERE per kWh, ERE laadpaal, ERE thuisladen, emissiereductie-eenheid prijs, ERE-E, HBE prijs",
     "image": {

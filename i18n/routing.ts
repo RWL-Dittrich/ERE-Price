@@ -16,6 +16,9 @@ export const routing = defineRouting({
   localePrefix: { mode: "always", prefixes },
   // Set when a visitor picks a language that differs from their browser's; kept for a year.
   localeCookie: { maxAge: 60 * 60 * 24 * 365 },
+  // No hreflang Link header from the middleware: it would say "en-GB" and x-default "/", contradicting the page's
+  // own <link rel="alternate"> tags (hreflang "en", x-default "/en") in app/[locale]/layout.tsx.
+  alternateLinks: false,
 });
 
 /** The page's path for a locale: "/nl" or "/en". */
