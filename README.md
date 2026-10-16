@@ -44,3 +44,5 @@ npm run dev     # ontwikkelserver op http://localhost:3000
 npm run build   # productiebuild (haalt de feed op)
 npm start       # productieserver
 ```
+
+Bij elke push naar `main` bouwt `.github/workflows/docker.yml` de `Dockerfile` en zet het image als `ghcr.io/rwl-dittrich/ere-price:latest` (en `:sha-<commit>`) in de GitHub Container Registry. Draaien: `docker run -p 3000:3000 ghcr.io/rwl-dittrich/ere-price`.
