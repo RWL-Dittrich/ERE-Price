@@ -48,7 +48,8 @@ export default async function StructuredData({ prices }: { prices: ErePrices }) 
         isAccessibleForFree: true,
         license: "https://creativecommons.org/licenses/by/4.0/",
         creator: { "@type": "Organization", name: "Joulo", url: "https://joulo.nl" },
-        spatialCoverage: { "@type": "Country", name: "NL" },
+        // Google's Dataset schema accepts Place (or a plain text), not Country.
+        spatialCoverage: { "@type": "Place", name: "Netherlands", address: { "@type": "PostalAddress", addressCountry: "NL" } },
         temporalCoverage: `${isoDate(prices.weeks[0].monday)}/${isoDate(prices.current.monday)}`,
         ...(Number.isNaN(Date.parse(prices.updatedAt)) ? {} : { dateModified: prices.updatedAt }),
         variableMeasured: [perEre("bid"), perEre("offer"), perEre("mid")],
